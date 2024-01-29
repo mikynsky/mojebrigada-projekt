@@ -1,12 +1,19 @@
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css"
-import Login from './Login';
+import LoginTab from './LoginTab';
 
 function App() {
 
-  return <div className="d-flex align-items-center justify-content-center" style={{height: "100vh"}}>
-   <Login></Login>
-  </div>;
+  const Background = {
+    height: "100vh", 
+    background: "rgb(131,58,180)",
+    background: "linear-gradient(90deg, rgba(131,58,180,1) 0%, rgba(253,29,29,1) 50%, rgba(252,176,69,1) 100%)"
+  }
+
+  return <div className="d-flex align-items-center justify-content-center" style={Background}>
+   <LoginTab></LoginTab>
+  </div>
+  ;
 }
 
 export default App;

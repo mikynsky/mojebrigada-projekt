@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { Link } from "react-router-dom";
 
-function Login() {
+function LoginTab() {
     const formStyle = {
         backgroundColor: "white",
         padding: "3rem",
@@ -31,8 +31,8 @@ function Login() {
     <Form.Group className="mb-3" controlId="formBasicCheckbox">
     </Form.Group>
     <div className="d-flex align-items-center justify-content-center">
-    <Link to="/home">
-      <Button className="btn-lg" variant="primary" type="submit" >
+    <Link to="/domu">
+      <Button className="btn-lg" variant="danger" type="submit" >
         Přihlásit se
     </Button>
     </Link>
@@ -41,4 +41,4 @@ function Login() {
   </div>
 }
 
-export default Login;
+export default LoginTab;

@@ -1,11 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './components/App';
-import Home from "./pages/Home.js";
+import DomuPage from "./pages/DomuPage.js";
 import {
     createBrowserRouter,
     RouterProvider,
   } from "react-router-dom";
+import SmenyPage from './pages/SmenyPage.js';
+import BrigadniciPage from './pages/BrigadniciPage.js';
   
   const router = createBrowserRouter([
     {
@@ -13,9 +15,18 @@ import {
       element: <App/>,
     },
     {
-        path: "/home",
-        element: <Home/>,
+        path: "/domu",
+        element: <DomuPage/>,
       },
+    {
+        path: "/smeny",
+        element: <SmenyPage/>,
+    },
+    {
+        path: "/brigadnici",
+        element: <BrigadniciPage/>,
+    },
+      
   ]);
   
 
