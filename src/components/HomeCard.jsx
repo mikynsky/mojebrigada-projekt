@@ -1,15 +1,12 @@
 import React from 'react';
-import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 
 function HomeCard() {
 
     let date = new Date()
-    let rok = date.getYear();
-    let den = date.getDate();
     let hodiny = date.getHours().toString();
     let minuty = date.getMinutes();
-    let mesic = date.getMonth();
+
 
   return ( <div className='d-flex justify-content-center text-center'>
     <Card className='m-5 d-flex ' style={{ width: '100%' }}>

@@ -8,11 +8,16 @@ import {
   } from "react-router-dom";
 import SmenyPage from './pages/SmenyPage.js';
 import BrigadniciPage from './pages/BrigadniciPage.js';
-  
+import LoginPage from './pages/LoginPage.js';
+
   const router = createBrowserRouter([
     {
       path: "/",
       element: <App/>,
+    },
+    {
+      path: "/login",
+      element: <LoginPage/>,
     },
     {
         path: "/domu",
