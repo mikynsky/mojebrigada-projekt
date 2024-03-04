@@ -1,4 +1,4 @@
-/* const express = require('express');
+const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -43,4 +43,4 @@ const UserSchema = new mongoose.Schema({
   
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-  }); */
+  });

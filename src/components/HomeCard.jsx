@@ -1,5 +1,6 @@
 import React from 'react';
 import Card from 'react-bootstrap/Card';
+import Image from "../img/home_img.jpg"
 
 function HomeCard() {
 
@@ -10,7 +11,7 @@ function HomeCard() {
 
   return ( <div className='d-flex justify-content-center text-center'>
     <Card className='m-5 d-flex ' style={{ width: '100%' }}>
-      <Card.Img variant="top" src="../src/img/home_img.jpg" />
+      <Card.Img variant="top" src={Image} height="200" />
       <Card.Body>
         <Card.Title>mojeBrigáda</Card.Title>
         <Card.Title>{hodiny}:{minuty}</Card.Title>
