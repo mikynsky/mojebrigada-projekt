@@ -25,11 +25,16 @@ function LoginRedirect() {
         color: "white"
     }
 
-    return <div style={style2} className='container d-flex justify-content-center align-items-center'><div style={style} className='text-center'><Link style={text} to="/login">
-        Pokračovat k přihlášení</Link>
+    return (
+        <div style={style2} className='container d-flex justify-content-center align-items-center'>
+            <div style={style} className='text-center'>
+                <Link style={text} to="/login">
+                    Pokračovat k přihlášení
+                </Link>
+            </div>
+            <Footer></Footer>
         </div>
-        <Footer></Footer>
-        </div>
+    );
 }
 
 export default LoginRedirect;

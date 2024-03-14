@@ -10,7 +10,7 @@ function OffcanvasUser({name}) {
   const handleShow = () => setShow(true);
 
   return (
-    <>
+    <div>
       <Button variant="secondary" onClick={handleShow}>
         Info
       </Button>
@@ -48,7 +48,7 @@ function OffcanvasUser({name}) {
           <Button variant="primary">Vymazat uživatele</Button>
         </Offcanvas.Body>
       </Offcanvas>
-    </>
+    </div>
   );
 }
 

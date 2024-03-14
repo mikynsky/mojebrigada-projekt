@@ -5,7 +5,9 @@ import LoginRedirect from './LoginRedirect';
 
 function App() {
 
-  return <LoginRedirect/>;
+  return (
+    <LoginRedirect/>
+  );
 }
 
 export default App;

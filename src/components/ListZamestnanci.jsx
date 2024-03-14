@@ -17,7 +17,7 @@ function ListZamestnanci() {
       <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[2]}<OffcanvasUser placement="end" name={users[2]} /></ListGroup.Item>      
       <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[3]}<OffcanvasUser placement="end" name={users[3]} /></ListGroup.Item>    
       <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[4]}<OffcanvasUser placement="end" name={users[4]} /></ListGroup.Item>  
-        </ListGroup>
+    </ListGroup>
   );
 }
 

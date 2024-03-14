@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -52,8 +53,51 @@ const shiftSchema = new mongoose.Schema({
   date: Date,
   startTime: String,
   endTime: String,
-  assignedTo: [userSchema] //přidat multiple users
+  assignedTo: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    }],
+    required: false
+  }
 });
+
+const messageSchema = new mongoose.Schema({
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  headline: String,
+  content: String
+})
+
+//Login
+
+app.post('/api/Login', async (req, res) => {
+  console.log(req)
+  const formEmail = req.body.email;
+  console.log(formEmail)
+  const formPass = req.body.password;
+
+  const user = await User.findOne({ email: formEmail });
+
+
+  console.log(user);
+  
+  if (user) {
+    const comparePass = await bcrypt.compare(formPass, user.password);
+    if (comparePass) {
+      return res.status(200).send("Login successful");
+    }
+  }
+
+  return res.status(401).send("Invalid credentials");
+});
+
 
 
 
@@ -77,23 +121,25 @@ app.post('/api/Shifts', async (req, res) => {
     if (!shift) {
       shift = new Shift({
         date: req.body.date,
+        startTime: req.body.startTime,
+        endTime: req.body.endTime,
         assignedTo: req.body.assignedTo
       });
     } else {
-      user.name = req.body.name; //??
-      user.description = req.body.description;
+        date = req.body.date || shift.date;
+        startTime = req.body.startTime || shift.startTime;
+        endTime = req.body.endTime || shift.endTime;
+        assignedTo = req.body.assignedTo || shift.assignedTo;
     }
 
-    await user.save();
-    res.send(user);
+    await shift.save();
+    console.log(shift);
+    res.send(shift);
 
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');
   }
-
-  await shift.save();
-  res.send(shift);
 });
 
 
@@ -141,6 +187,50 @@ app.post('/api/Users', async (req, res) => {
     await user.save();
     console.log(user);
     res.send(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+});
+
+
+//Zprávy
+
+
+const Message = mongoose.model('Message', messageSchema);
+
+
+app.get('/api/Messages', async (req, res) => {
+  const messages = await Message.find();
+  console.log(messages)
+  res.send(messages);
+});
+
+app.post('/api/Messages', async (req, res) => {
+  try {
+    let user = await User.findOne({ email: req.body.createdBy});
+    //let message = await Message.findOne({ createdAt: req.body.createdAt})
+
+
+    if (!user) throw "Internal server error";
+
+    //if (!message) {}
+
+
+    const message = new Message({
+      createdAt: Date.now(),
+      createdBy: user._id,
+      headline: req.body.headline,
+      content: req.body.content
+    })
+
+
+    await message.save();
+    console.log(message)
+    res.send(message);
+
+
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');

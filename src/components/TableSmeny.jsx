@@ -1,5 +1,6 @@
 import React from 'react';
 import Table from 'react-bootstrap/Table';
+import AddShift from './AddShift';
 
 function TableSmeny() {
   return ( <div className='d-flex justify-content-center'>
@@ -7,41 +8,29 @@ function TableSmeny() {
       <thead>
         <tr>
           <th></th>
-          {Array.from({ length: 9 }).map((_, index) => (
-            <th key={index}>Směna</th>
-          ))}
+            <th>Směna</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>Po</td>
-          {Array.from({ length: 9 }).map((_, index) => (
-            <td key={index}>Blok směny {index}</td>
-          ))}
+            <AddShift/>
         </tr>
         <tr>
           <td>Út</td>
-          {Array.from({ length: 9 }).map((_, index) => (
-            <td key={index}>Blok směny {index}</td>
-          ))}
+            <AddShift/>
         </tr>
         <tr>
           <td>St</td>
-          {Array.from({ length: 9 }).map((_, index) => (
-            <td key={index}>Blok směny {index}</td>
-          ))}
+            <AddShift/>
         </tr>
         <tr>
           <td>Čt</td>
-          {Array.from({ length: 9 }).map((_, index) => (
-            <td key={index}>Blok směny {index}</td>
-          ))}
+            <AddShift/>
         </tr>
         <tr>
           <td>Pá</td>
-          {Array.from({ length: 9 }).map((_, index) => (
-            <td key={index}>Blok směny {index}</td>
-          ))}
+            <AddShift/>
         </tr>
       </tbody>
     </Table>
