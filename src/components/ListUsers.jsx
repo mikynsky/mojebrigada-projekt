@@ -1,14 +1,18 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ListGroup from 'react-bootstrap/ListGroup';
 import OffcanvasUser from './OffcanvasUser';
 
-function ListZamestnanci() {
+function ListUsers() {
 
     const Background = {
         background: "#F5F1F1"
       }
     
     const users = ["Lukáš", "Alfons", "Klára", "Lucie", "Petr"]
+
+      
+
+
     
   return (
     <ListGroup className='m-5'>
@@ -21,4 +25,4 @@ function ListZamestnanci() {
   );
 }
 
-export default ListZamestnanci;
+export default ListUsers;

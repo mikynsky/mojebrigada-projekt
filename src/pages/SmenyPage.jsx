@@ -1,12 +1,12 @@
 import React from 'react';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
-import TableSmeny from '../components/TableSmeny';
+import TableShifts from '../components/TableShifts';
 
 function SmenyPage() {
     return <div>
     <NavBar></NavBar>
-    <TableSmeny/>
+    <TableShifts/>
     <Footer></Footer>
     </div>;
 }

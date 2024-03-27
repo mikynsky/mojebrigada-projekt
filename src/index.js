@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './components/App';
-import DomuPage from "./pages/DomuPage.js";
+import DomuPage from "./pages/DomuPage.jsx";
 import {
     createBrowserRouter,
     RouterProvider,
   } from "react-router-dom";
-import SmenyPage from './pages/SmenyPage.js';
-import BrigadniciPage from './pages/BrigadniciPage.js';
-import LoginPage from './pages/LoginPage.js';
+import SmenyPage from './pages/SmenyPage.jsx';
+import BrigadniciPage from './pages/BrigadniciPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
 
   const router = createBrowserRouter([
     {

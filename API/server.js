@@ -207,35 +207,16 @@ app.get('/api/Messages', async (req, res) => {
 });
 
 app.post('/api/Messages', async (req, res) => {
-  try {
-    let user = await User.findOne({ email: req.body.createdBy});
-    //let message = await Message.findOne({ createdAt: req.body.createdAt})
-
-
-    if (!user) throw "Internal server error";
-
-    //if (!message) {}
-
-
     const message = new Message({
       createdAt: Date.now(),
-      createdBy: user._id,
+      createdBy: req.body.createdBy,
       headline: req.body.headline,
       content: req.body.content
     })
 
-
-    await message.save();
     console.log(message)
     res.send(message);
-
-
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
-  }
-});
+  });
 
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Form from 'react-bootstrap/Form';
+import ModalConfirm from './ModalConfirm';
 
 function OffcanvasUser({name}) {
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const [modalShow, setModalShow] = React.useState(false);
 
   return (
     <div>
@@ -45,9 +48,15 @@ function OffcanvasUser({name}) {
             </Button>
           </Form>
           <hr></hr>
-          <Button variant="primary">Vymazat uživatele</Button>
+          <Button variant="primary"onClick={() => setModalShow(true)} >Vymazat uživatele</Button>
         </Offcanvas.Body>
       </Offcanvas>
+      
+      <ModalConfirm
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
+
     </div>
   );
 }
