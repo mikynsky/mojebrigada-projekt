@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Card from 'react-bootstrap/Card';
 import Image from "../img/home_img.jpg"
 import MessageCard from './MessageCard';
+import axios from "axios";
 
 function HomeCard() {
 
@@ -18,6 +19,23 @@ function HomeCard() {
       minutes = minuty;
     }
 
+    const [messages, setMessages] = useState([])
+    const [users, setUsers] = useState([])
+
+    
+    useEffect(()=> {
+      axios.get("http://localhost:3001/api/Messages")
+      .then(messages => setMessages(messages.data))
+      .catch(err => console.log(err))
+    }, []);
+
+    useEffect(()=> {
+      axios.get("http://localhost:3001/api/Users")
+      .then(users => setUsers(users.data))
+      .catch(err => console.log(err))
+    }, []);
+
+
   return ( 
     <div className='d-flex justify-content-center text-center'>
       <Card className='m-5 d-flex ' style={{ width: '100%' }}>
@@ -30,8 +48,18 @@ function HomeCard() {
             bulk of the card's content.
           </Card.Text>
         </Card.Body>
-        <MessageCard title="Pozdrav" author="Admin" cardText="Zdravím zdravím, dobré dopo" />
-
+        
+        {
+          messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .map(message => {
+            return <MessageCard 
+              title={message.headline} 
+              author={`${message.userName} ${message.userSurname}`} 
+              cardText={message.content}  
+              createdAt={message.createdAt}
+            />
+          })
+        }
       </Card>
 
     </div>

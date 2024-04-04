@@ -1,13 +1,8 @@
 import React from 'react';
 import Table from 'react-bootstrap/Table';
-import AddShift from './AddShift';
 import ShiftBlock from './ShiftBlock';
 
-function TableShifts() {
-
-  const date = ["1.4.", "2.4.", "3.4.","4.4.","5.4.","6.4.","7.4."]
-
-
+function TableShiftsUser() {
   return ( <div className='d-flex justify-content-center'>
     <Table  responsive className='mx-5 my-1' style={{width:"100vh"}}>
       <thead>
@@ -18,47 +13,41 @@ function TableShifts() {
       </thead>
       <tbody>
         <tr>
-          <td>Po {date[0]}</td>
+          <td>Po</td>
           <div className='shift-container'>
             <ShiftBlock/>
             <ShiftBlock/>
-            <AddShift/>
+ 
           </div>
         </tr>
         <tr>
-          <td>Út {date[1]}</td>
+          <td>Út</td>
           <div className='shift-container'>
-            <AddShift/>
           </div>
         </tr>
         <tr>
-          <td>St {date[2]}</td>
+          <td>St</td>
           <div className='shift-container'>
-            <AddShift/>
           </div>
         </tr>
         <tr>
-          <td>Čt {date[3]}</td>
+          <td>Čt</td>
           <div className='shift-container'>
-            <AddShift/>
           </div>
         </tr>
         <tr>
-          <td>Pá {date[4]}</td>
+          <td>Pá</td>
           <div className='shift-container'>
-            <AddShift/>
           </div>
         </tr>
         <tr>
-          <td>So {date[5]}</td>
+          <td>So</td>
           <div className='shift-container'>
-            <AddShift/>
           </div>
         </tr>
         <tr>
-          <td>Ne {date[6]}</td>
+          <td>Ne</td>
           <div className='shift-container'>
-            <AddShift/>
           </div>
         </tr>
 
@@ -68,4 +57,4 @@ function TableShifts() {
   );
 }
 
-export default TableShifts;
+export default TableShiftsUser;

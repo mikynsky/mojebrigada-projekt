@@ -19,7 +19,12 @@ mongoose.connect('mongodb+srv://admin:admin@mojebrigadadb.3up8vxj.mongodb.net/mo
 
 
 const userSchema = new mongoose.Schema({
-  username: {
+  name: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  surname: {
     type: String,
     required: true,
     unique: true
@@ -41,7 +46,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  privilageLevel: {
+  privilegeLevel: {
     type: String,
     enum: ["SuperAdmin", "Admin", "User"],
     default: "User"
@@ -160,23 +165,28 @@ app.get('/api/Users', async (req, res) => {
 app.post('/api/Users', async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
+    console.log(user)
     if (!user) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      var dateFormated = new Date(req.body.birthDate);
+
 
       user = new User({
-        username: req.body.username,
+        name: req.body.name,
+        surname: req.body.surname,
         email: req.body.email,
         password: hashedPassword,
         createdAt: req.body.createdAt || Date.now(),
-        birthDate: req.body.birthDate,
-        privilageLevel: req.body.privilageLevel || "User"
+        birthDate: dateFormated,
+        privilegeLevel: req.body.privilegeLevel || "User"
       });
     } else {
 
-      user.username = req.body.username || user.username;
-      user.birthDate = req.body.birthDate || user.birthDate;
-      user.privilageLevel = req.body.privilageLevel || user.privilageLevel;
+      user.name = req.body.name || user.name;
+      user.surname = req.body.surname || user.surname;
+      user.birthDate = dateFormated || user.birthDate;
+      user.privilegeLevel = req.body.privilegeLevel || user.privilegeLevel;
 
       if (req.body.password) {
         const salt = await bcrypt.genSalt(10);
@@ -193,27 +203,63 @@ app.post('/api/Users', async (req, res) => {
   }
 });
 
+app.delete('/api/Users', async (req, res) => {
+  try {
+    let user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).send("User was not found.")
+    }
+
+    await User.deleteOne({ email: req.body.email });
+    console.log(user);
+    res.send(user);
+    } catch (error) { 
+      console.error(error);
+      res.status(500).send("Error deleting user")
+    }
+  });
 
 //Zprávy
 
 
 const Message = mongoose.model('Message', messageSchema);
 
-
 app.get('/api/Messages', async (req, res) => {
-  const messages = await Message.find();
-  console.log(messages)
-  res.send(messages);
+  console.log("we have reached messages")
+  try {
+    const messages = await Message.find()
+                                  .populate('createdBy', 'name surname')
+                                  .exec();
+    console.log(messages)
+    const formatedMessages = messages.map(message => {
+      const messageObject = message.toObject(); 
+      if (messageObject.createdBy) {
+        messageObject.userName = messageObject.createdBy.name;
+        messageObject.userSurname = messageObject.createdBy.surname;
+        messageObject.createdBy = message.createdBy._id;
+      }
+      return messageObject;
+    });
+
+    console.log(formatedMessages);
+    res.send(formatedMessages);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred fetching messages.");
+  }
 });
 
+
+
 app.post('/api/Messages', async (req, res) => {
-    const message = new Message({
+    let message = new Message({
       createdAt: Date.now(),
       createdBy: req.body.createdBy,
       headline: req.body.headline,
       content: req.body.content
     })
 
+    await message.save();
     console.log(message)
     res.send(message);
   });

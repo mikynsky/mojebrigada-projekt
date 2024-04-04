@@ -1,7 +1,7 @@
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css"
-import LoginTab from '../components/LoginTab';
-import Footer from '../components/Footer';
+import LoginTab from '../../components/LoginTab';
+import Footer from '../../components/Footer';
 
 function LoginPage() {
 

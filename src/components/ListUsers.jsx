@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import ListGroup from 'react-bootstrap/ListGroup';
 import OffcanvasUser from './OffcanvasUser';
+import axios from "axios";
 
 function ListUsers() {
 
@@ -8,19 +9,28 @@ function ListUsers() {
         background: "#F5F1F1"
       }
     
-    const users = ["Lukáš", "Alfons", "Klára", "Lucie", "Petr"]
+  
+    const [users, setUsers] = useState([])
 
-      
+    useEffect(()=> {
+      axios.get("http://localhost:3001/api/Users")
+      .then(users => setUsers(users.data))
+      .catch(err => console.log(err))
+    }, []);
 
-
+    
     
   return (
     <ListGroup className='m-5'>
-      <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[0]}<OffcanvasUser placement="end" name={users[0]} /></ListGroup.Item>
-      <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[1]}<OffcanvasUser placement="end" name={users[1]} /></ListGroup.Item>
-      <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[2]}<OffcanvasUser placement="end" name={users[2]} /></ListGroup.Item>      
-      <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[3]}<OffcanvasUser placement="end" name={users[3]} /></ListGroup.Item>    
-      <ListGroup.Item style={Background} className='d-flex justify-content-between'>{users[4]}<OffcanvasUser placement="end" name={users[4]} /></ListGroup.Item>  
+      {
+        users.map(user => {
+          return <ListGroup.Item style={Background} className='d-flex justify-content-between'>
+            {`${user.name} ${user.surname}`}
+            <OffcanvasUser placement="end" name={user.name} surname={user.surname} email={user.email} type={user.privilageLevel} birthDate={user.birthDate}/>
+            </ListGroup.Item> 
+        })
+      }
+      
     </ListGroup>
   );
 }

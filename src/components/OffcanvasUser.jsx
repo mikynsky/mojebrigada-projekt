@@ -4,7 +4,21 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import Form from 'react-bootstrap/Form';
 import ModalConfirm from './ModalConfirm';
 
-function OffcanvasUser({name}) {
+
+function OffcanvasUser({name, surname, email, type, birthDate}) {
+
+
+  let selected;
+  if (type == "User") {
+    selected = 1;
+  } else {
+    selected = 2;
+  }
+
+
+  const birthDateFormated = birthDate[8]+birthDate[9] + "." + birthDate[5]+birthDate[6] + "." + birthDate[0]+birthDate[1]+birthDate[2]+birthDate[3];
+
+
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
@@ -29,19 +43,28 @@ function OffcanvasUser({name}) {
             <h4>Upravit údaje</h4>
             <Form.Group className="mb-3" controlId="formBasicUsername">
               <Form.Label>Jméno</Form.Label>
-              <Form.Control type="text" value={name} />
+              <Form.Control type="text" defaultValue={name}/>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formBasicUsername">
+              <Form.Label>Příjmení</Form.Label>
+              <Form.Control type="text" defaultValue={surname}/>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Email</Form.Label>
-              <Form.Control type="email" placeholder="" />
+              <Form.Control type="email" defaultValue={email} />
             </Form.Group>
             
-            <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Group className="mb-3" controlId="formBasicType">
               <Form.Label>Typ uživatele</Form.Label>
-              <Form.Select aria-label="Default select example">
+              
+              <Form.Select defaultValue={selected}>
                 <option value="1">Brigádník</option>
                 <option value="2">Administrátor</option>
               </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formBasicBirthDate">
+            <Form.Label>Datum narození</Form.Label>
+              <Form.Control type="text" placeholder={birthDateFormated} readOnly />
             </Form.Group>
             <Button variant="secondary" type="submit">
               Uložit změny
@@ -55,6 +78,8 @@ function OffcanvasUser({name}) {
       <ModalConfirm
         show={modalShow}
         onHide={() => setModalShow(false)}
+        userName={name + " " + surname}
+        email={email}
       />
 
     </div>
