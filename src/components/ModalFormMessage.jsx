@@ -18,6 +18,7 @@ function ModalFormMessage(props) {
     try {
       const response = await axios.post("http://localhost:3001/api/Messages", createdMessage)
       console.log('Data posted successfully:', response.data);
+      window.location.reload(); 
     } catch (error) {
       console.error('Error posting data:', error);
     }
@@ -26,7 +27,6 @@ function ModalFormMessage(props) {
   const handleClick = () => {
     handleSubmit();
     onHide();
-    window.location.reload(); 
   };
 
   return (

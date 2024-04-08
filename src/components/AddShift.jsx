@@ -6,38 +6,32 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/esm/Col';
 import Row from 'react-bootstrap/esm/Row';
+import axios from 'axios';
 
-function OffcanvasShift({ date, startTime, endTime, ...props }) {
+function OffcanvasShift({ day, month, year, ...props }) {
     const [show, setShow] = useState(false);
   
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [selectedDay, setSelectedDay] = useState('');
-    const [selectedMonth, setSelectedMonth] = useState('');
+
+    const [selectedDay, setSelectedDay] = useState(day);
+    const [selectedMonth, setSelectedMonth] = useState(month);
+    const [selectedYear, setSelectedYear] = useState(year);
     const [selectedStart, setSelectedStart] = useState('');
     const [selectedEnd, setSelectedEnd] = useState('');
 
-
-
-        /* $('.date').datepicker({
-            multidate: true,
-              format: 'dd-mm-yyyy'
-          });
-
-          <div class="container">
-                    <h3>Bootstrap Multi Select Date Picker</h3>
-                    <input type="text" class="form-control date" placeholder="Pick the multiple dates"/>
-            </div>	
-
-
-          */
+    
     const handleSelectDay = (event) => {
       setSelectedDay(event.target.value);
     }
 
     const handleSelectMonth = (event) => {
       setSelectedMonth(event.target.value);
+    }
+
+    const handleSelectYear = (event) => {
+      setSelectedYear(event.target.value);
     }
 
     const handleSelectStart = (event) => {
@@ -55,15 +49,40 @@ function OffcanvasShift({ date, startTime, endTime, ...props }) {
       }
 
       const time = [];
-      for (let hour = 0; hour < 24; hour++) {
+      for (let hour = selectedStart; hour < 24; hour++) {
         let formatedHour = hour.toString().padStart(2, '0');
         let hours = formatedHour + ":00";
         time.push(<option key={formatedHour} value={formatedHour}>{hours}</option>);
       }
 
+      const years = [];
+        for (let year = 1970; year <= 2030; year++) {
+          years.push(<option key={year} value={year}>{year}</option>);
+        }
+
+        const handleSubmit = async (event) => {
+          // event.preventDefault();
+          const createdShift = {
+            date: year + "-" + month + "-" + day ,
+            startTime: selectedStart,
+            endTime: selectedEnd
+          };
+          try {
+            const response = await axios.post("http://localhost:3001/api/Shifts", createdShift)
+            console.log('Data posted successfully:', response.data);
+          } catch (error) {
+            console.error('Error posting data:', error);
+          }
+        };
+      
+        const handleClick = () => {
+          handleSubmit();
+          window.location.reload(); 
+        };
+
     return (
       <>
-      <div className='add-shift m-2' onClick={handleShow}>+</div>
+      <div className='add-shift m-2' onClick={handleShow} title="Přidat směnu">+</div>
         <Offcanvas show={show} onHide={handleClose} {...props}>
           <Offcanvas.Header closeButton>
             <Offcanvas.Title>Přidat směnu</Offcanvas.Title>
@@ -96,11 +115,17 @@ function OffcanvasShift({ date, startTime, endTime, ...props }) {
                 <option key="12" value="12">Prosinec</option>
             </Form.Select>
           </Col>
+          <Col md>
+            <Form.Select defaultValue={selectedYear} onChange={handleSelectYear} aria-label="Year">
+                <option>Rok</option>
+                {years}
+            </Form.Select>
+          </Col>
         </Row>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Čas: Od</Form.Label>
-              <Form.Select defaultValue={selectedDay} onChange={handleSelectStart} aria-label="Day">
+              <Form.Select defaultValue={selectedStart} onChange={handleSelectStart} aria-label="Day">
                 <option>Od</option>
                 {time}
             </Form.Select>
@@ -108,13 +133,13 @@ function OffcanvasShift({ date, startTime, endTime, ...props }) {
 
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Čas: Do</Form.Label>
-              <Form.Select defaultValue={selectedDay} onChange={handleSelectEnd} aria-label="Day">
+              <Form.Select defaultValue={selectedEnd} onChange={handleSelectEnd} aria-label="Day">
                 <option>Od</option>
                 {time}
               </Form.Select>       
             </Form.Group>
             
-            <Button variant="secondary" type="submit">
+            <Button variant="secondary" type="submit" onClick={handleClick}>
               Zveřejnit směnu
             </Button>
           </Form>
@@ -123,10 +148,14 @@ function OffcanvasShift({ date, startTime, endTime, ...props }) {
       </>   
 )}
 
-function AddShift() {
+function AddShift(date) {
+    date = new Date(date);
+    const day = date.getDate();
+    const month = date.getMonth();
+    const year =  date.getFullYear();
     return (
-      <>
-          <OffcanvasShift placement="end" />
+      <> 
+          <OffcanvasShift day={day} month={month} year={year} placement="end" />
       </>
     );
   }

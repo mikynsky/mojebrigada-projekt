@@ -16,7 +16,7 @@ function AddButtonUser(props) {
   
   return (
     <>
-      <Button variant="primary"  style={ButtonStyle} onClick={() => setModalShow(true)}>
+      <Button variant="primary" title="Přidat uživatele" style={ButtonStyle} onClick={() => setModalShow(true)}>
       {content}
       </Button>
       

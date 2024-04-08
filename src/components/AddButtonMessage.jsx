@@ -16,7 +16,7 @@ function AddButtonMessage(props) {
   
   return (
     <>
-      <Button variant="primary"  style={ButtonStyle} onClick={() => setModalShow(true)}>
+      <Button variant="primary" title="Přidat zprávu" style={ButtonStyle} onClick={() => setModalShow(true)}>
       {content}
       </Button>
       

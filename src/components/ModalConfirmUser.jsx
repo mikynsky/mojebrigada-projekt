@@ -2,18 +2,15 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
 
-function ModalConfirm(props) {
-  const {userName, email, onHide } = props;
+function ModalConfirmUser(props) {
+  const {userName, email, id, onHide } = props;
 
 
-  const handleDelete = async (event, userEmail) => {
+  const handleDelete = async (event) => {
     event.preventDefault();
-    const userData = {
-      email: userEmail
-    }
     try {
-      const response = await axios.delete("http://localhost:3001/api/Users", userData)
-      console.log('Data deleted successfully:', response.data);
+      const response = await axios.delete(`http://localhost:3001/api/Users/${id}`)
+      console.log('Data deleted successfully:');
     } catch (error) {
       console.error('Error deleting data:', error);
     }
@@ -34,10 +31,10 @@ function ModalConfirm(props) {
       </Modal.Header>
       <Modal.Footer>
         <Button variant="secondary" type="submit" onClick={onHide}>Ne, nemazat</Button>
-          <Button variant="primary" type="submit" onClick={(event) => { handleDelete(event, email); onHide(); }}>Ano, smazat</Button>
+          <Button variant="primary" type="submit" onClick={(event) => { handleDelete(event); onHide(); }}>Ano, smazat</Button>
         </Modal.Footer>
     </Modal>
   );
 }
 
-export default ModalConfirm;
+export default ModalConfirmUser;

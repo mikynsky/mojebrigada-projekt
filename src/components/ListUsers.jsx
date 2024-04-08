@@ -26,7 +26,7 @@ function ListUsers() {
         users.map(user => {
           return <ListGroup.Item style={Background} className='d-flex justify-content-between'>
             {`${user.name} ${user.surname}`}
-            <OffcanvasUser placement="end" name={user.name} surname={user.surname} email={user.email} type={user.privilageLevel} birthDate={user.birthDate}/>
+            <OffcanvasUser placement="end" id={user._id} name={user.name} surname={user.surname} email={user.email} type={user.privilageLevel} birthDate={user.birthDate}/>
             </ListGroup.Item> 
         })
       }

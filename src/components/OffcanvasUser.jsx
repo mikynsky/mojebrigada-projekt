@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Form from 'react-bootstrap/Form';
-import ModalConfirm from './ModalConfirm';
+import ModalConfirmUser from './ModalConfirmUser';
 
 
-function OffcanvasUser({name, surname, email, type, birthDate}) {
+function OffcanvasUser({name, surname, email, type, birthDate, id}) {
 
 
   let selected;
@@ -75,11 +75,12 @@ function OffcanvasUser({name, surname, email, type, birthDate}) {
         </Offcanvas.Body>
       </Offcanvas>
       
-      <ModalConfirm
+      <ModalConfirmUser
         show={modalShow}
         onHide={() => setModalShow(false)}
         userName={name + " " + surname}
         email={email}
+        id={id}
       />
 
     </div>

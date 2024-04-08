@@ -5,6 +5,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 
 
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -80,6 +81,137 @@ const messageSchema = new mongoose.Schema({
   content: String
 })
 
+const weekSchema = new mongoose.Schema({
+  weekNumber: Number,
+  startDate: Date,
+  monday: {
+    dayDate: Date,
+    shifts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Shift',
+    }]
+  },
+  tuesday: {
+    dayDate: Date,
+    shifts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Shift',
+    }]
+  },
+  wednesday: {
+    dayDate: Date,
+    shifts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Shift',
+    }]
+  },
+  thursday: {
+    dayDate: Date,
+    shifts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Shift',
+    }]
+  },
+  friday: {
+    dayDate: Date,
+    shifts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Shift',
+    }]
+  },
+  saturday: {
+    dayDate: Date,
+    shifts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Shift',
+    }]
+  },
+  sunday: {
+    dayDate: Date,
+    shifts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Shift',
+    }]
+  },
+})
+
+const templateSchema = new mongoose.Schema({
+  templateName: String,
+  monday: {
+    shifts: [{
+        shiftOne: {
+          date: Date,
+          startTime: String,
+          endTime: String,
+        }
+    }]
+  },
+  tuesday: {
+    shifts: [{
+        shiftOne: {
+          date: Date,
+          startTime: String,
+          endTime: String,
+        }
+    }]
+  },
+  wednesday: {
+    shifts: [{
+        shiftOne: {
+          date: Date,
+          startTime: String,
+          endTime: String,
+        }
+    }]
+  },
+  thursday: {
+    shifts: [{
+        shiftOne: {
+          date: Date,
+          startTime: String,
+          endTime: String,
+        }
+    }]
+  },
+  friday: {
+    shifts: [{
+        shiftOne: {
+          date: Date,
+          startTime: String,
+          endTime: String,
+        }
+    }]
+  },
+  saturday: {
+    shifts: [{
+        shiftOne: {
+          date: Date,
+          startTime: String,
+          endTime: String,
+        }
+    }]
+  },
+  sunday: {
+    shifts: [{
+        shiftOne: {
+          date: Date,
+          startTime: String,
+          endTime: String,
+        }
+    }]
+  },
+})
+
+
+// přidání dvou hodin
+messageSchema.pre('save', function(next) {
+  this.createdAt.setHours(this.createdAt.getHours() + 2);
+  next();
+});
+
+
+
+
 //Login
 
 app.post('/api/Login', async (req, res) => {
@@ -103,9 +235,150 @@ app.post('/api/Login', async (req, res) => {
   return res.status(401).send("Invalid credentials");
 });
 
+// TÝDNY
+
+async function createNewWeek() {
+  try {
+    
+
+    let latestWeek = await Week.findOne().sort({ startDate: -1 });
+    const date = new Date(latestWeek.startDate);
 
 
+    const existingWeek = await Week.findOne({ weekNumber: latestWeek.weekNumber + 1 });
 
+    if (existingWeek) {
+      console.log('Week  already exists.');
+      return;
+    }
+
+    
+    date.setDate(date.getDate() + 7);
+
+    const tuesdayDate = new Date(date);
+    const wednesdayDate = new Date(date);
+    const thursdayDate = new Date(date);
+    const fridayDate = new Date(date);
+    const saturdayDate = new Date(date);
+    const sundayDate = new Date(date);
+
+    tuesdayDate.setDate(tuesdayDate.getDate() + 1);
+    wednesdayDate.setDate(wednesdayDate.getDate() + 2);
+    thursdayDate.setDate(thursdayDate.getDate() + 3);
+    fridayDate.setDate(fridayDate.getDate() + 4);
+    saturdayDate.setDate(saturdayDate.getDate() + 5);
+    sundayDate.setDate(sundayDate.getDate() + 6);
+
+
+    var week = new Week({
+      weekNumber: latestWeek.weekNumber + 1,
+      startDate: date,
+      monday: {
+        dayDate: date,
+        shifts: []
+      },
+      tuesday: {
+        dayDate: tuesdayDate,
+        shifts: []
+      },
+      wednesday: {
+        dayDate: wednesdayDate,
+        shifts: []
+      },
+      thursday: {
+        dayDate: thursdayDate,
+        shifts: []
+      },
+      friday: {
+        dayDate: fridayDate,
+        shifts: []
+      },
+      saturday: {
+        dayDate: saturdayDate,
+        shifts: []
+      },
+      sunday: {
+        dayDate: sundayDate,
+        shifts: []
+      } 
+    })
+
+      await week.save();
+      console.log(week);
+    } catch (error) {
+      console.error(error);
+    }
+}
+
+const Week = mongoose.model('Week', weekSchema);
+
+app.get('/api/Weeks', async (req, res) => {
+
+  const weekNumber = req.query.weekNumber
+  const weeks = await Week.findOne({weekNumber: weekNumber});
+
+  console.log(weekNumber)
+  console.log(weeks)
+
+  if (!weekNumber) {
+    res.status(400).send()
+  }
+
+  if (!weeks) {
+    createNewWeek();
+  }
+
+  console.log(weeks);
+  res.send(weeks);
+});
+
+
+app.get('/api/WeeksCurrent', async (req, res) => {
+  try {
+
+    console.log("we are in.");
+    const currentDate = new Date();
+    currentDate.setHours(currentDate.getHours() + 2);
+
+
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - 6);
+
+
+    const week = await Week.findOne({ startDate: { $gt: date, $lte: currentDate } });
+
+    if (week) {
+      console.log(week.weekNumber);
+      res.json(week.weekNumber);
+      console.log(week.weekNumber);
+    } else {
+      res.json({ message: 'No week found for current date' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+});
+
+
+app.post('/api/Weeks', async (req, res) => {
+  try {
+    createNewWeek();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+});
+
+//TEMPLATE
+
+const Template = mongoose.model('Template', templateSchema);
+
+app.get('/api/Templates', async (req, res) => {
+  const template = await Template.find();
+  console.log(template);
+  res.send(template);
+});
 
 //SMĚNY
 
@@ -120,16 +393,29 @@ app.get('/api/Shifts', async (req, res) => {
 });
 
 app.post('/api/Shifts', async (req, res) => {
+ 
+  try {
+    let shift = new Shift({
+      date: req.body.date,
+      startTime: req.body.startTime,
+      endTime: req.body.endTime,
+      assignedTo: req.body.assignedTo
+    })
+    await shift.save();
+    console.log(shift);
+    res.send(shift);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+});
+
+app.patch('/api/Shifts', async (req, res) => {
   try {
     let shift = await Shift.findOne({ date: req.body.date});
 
     if (!shift) {
-      shift = new Shift({
-        date: req.body.date,
-        startTime: req.body.startTime,
-        endTime: req.body.endTime,
-        assignedTo: req.body.assignedTo
-      });
+      res.status(404).send("Shift not found.")
     } else {
         date = req.body.date || shift.date;
         startTime = req.body.startTime || shift.startTime;
@@ -203,16 +489,21 @@ app.post('/api/Users', async (req, res) => {
   }
 });
 
-app.delete('/api/Users', async (req, res) => {
+app.delete('/api/Users/:id', async (req, res) => {
   try {
-    let user = await User.findOne({ email: req.body.email });
+    console.log("Were in to delete.");
+    //console.log(req.body);
+    let user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
       return res.status(404).send("User was not found.")
     }
+    console.log(user)
+    res.status(200).send();
 
-    await User.deleteOne({ email: req.body.email });
-    console.log(user);
-    res.send(user);
+    // await User.deleteOne({});
+    // console.log("Uživatel smazán")
+    // console.log(user);
+    // res.send(user);
     } catch (error) { 
       console.error(error);
       res.status(500).send("Error deleting user")

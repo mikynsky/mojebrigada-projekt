@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import ModalConfirmShift from './ModalConfirmShift';
 
 
 
@@ -13,7 +14,8 @@ function OffcanvasShiftInfo({ name, ...props }) {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-
+    const [modalShow, setModalShow] = React.useState(false);
+  
     return (
       <>
       <div className='shift-block m-2' onClick={handleShow}>Směna</div>
@@ -39,11 +41,17 @@ function OffcanvasShiftInfo({ name, ...props }) {
               <Form.Control type="email" placeholder="" readOnly/>
             </Form.Group>
             <Form.Label>Lidé přihlášeni na směnu:</Form.Label>
-
-
+            <hr></hr>
+            <Button variant="primary" >Vymazat směnu</Button>
           </Form>
           </Offcanvas.Body>
         </Offcanvas>
+
+        <ModalConfirmShift
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
+
       </>   
 )}
 
