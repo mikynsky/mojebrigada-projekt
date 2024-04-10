@@ -56,7 +56,6 @@ const userSchema = new mongoose.Schema({
 
 
 const shiftSchema = new mongoose.Schema({
-  date: Date,
   startTime: String,
   endTime: String,
   assignedTo: {
@@ -149,7 +148,6 @@ const templateSchema = new mongoose.Schema({
   tuesday: {
     shifts: [{
         shiftOne: {
-          date: Date,
           startTime: String,
           endTime: String,
         }
@@ -158,7 +156,6 @@ const templateSchema = new mongoose.Schema({
   wednesday: {
     shifts: [{
         shiftOne: {
-          date: Date,
           startTime: String,
           endTime: String,
         }
@@ -167,7 +164,6 @@ const templateSchema = new mongoose.Schema({
   thursday: {
     shifts: [{
         shiftOne: {
-          date: Date,
           startTime: String,
           endTime: String,
         }
@@ -176,7 +172,6 @@ const templateSchema = new mongoose.Schema({
   friday: {
     shifts: [{
         shiftOne: {
-          date: Date,
           startTime: String,
           endTime: String,
         }
@@ -185,7 +180,6 @@ const templateSchema = new mongoose.Schema({
   saturday: {
     shifts: [{
         shiftOne: {
-          date: Date,
           startTime: String,
           endTime: String,
         }
@@ -194,7 +188,6 @@ const templateSchema = new mongoose.Schema({
   sunday: {
     shifts: [{
         shiftOne: {
-          date: Date,
           startTime: String,
           endTime: String,
         }
@@ -239,7 +232,6 @@ app.post('/api/Login', async (req, res) => {
 
 async function createNewWeek() {
   try {
-    
 
     let latestWeek = await Week.findOne().sort({ startDate: -1 });
     const date = new Date(latestWeek.startDate);
@@ -252,7 +244,7 @@ async function createNewWeek() {
       return;
     }
 
-    
+
     date.setDate(date.getDate() + 7);
 
     const tuesdayDate = new Date(date);
@@ -317,8 +309,6 @@ app.get('/api/Weeks', async (req, res) => {
   const weekNumber = req.query.weekNumber
   const weeks = await Week.findOne({weekNumber: weekNumber});
 
-  console.log(weekNumber)
-  console.log(weeks)
 
   if (!weekNumber) {
     res.status(400).send()
@@ -336,7 +326,6 @@ app.get('/api/Weeks', async (req, res) => {
 app.get('/api/WeeksCurrent', async (req, res) => {
   try {
 
-    console.log("we are in.");
     const currentDate = new Date();
     currentDate.setHours(currentDate.getHours() + 2);
 
@@ -348,9 +337,7 @@ app.get('/api/WeeksCurrent', async (req, res) => {
     const week = await Week.findOne({ startDate: { $gt: date, $lte: currentDate } });
 
     if (week) {
-      console.log(week.weekNumber);
       res.json(week.weekNumber);
-      console.log(week.weekNumber);
     } else {
       res.json({ message: 'No week found for current date' });
     }
@@ -396,7 +383,6 @@ app.post('/api/Shifts', async (req, res) => {
  
   try {
     let shift = new Shift({
-      date: req.body.date,
       startTime: req.body.startTime,
       endTime: req.body.endTime,
       assignedTo: req.body.assignedTo
@@ -412,12 +398,11 @@ app.post('/api/Shifts', async (req, res) => {
 
 app.patch('/api/Shifts', async (req, res) => {
   try {
-    let shift = await Shift.findOne({ date: req.body.date});
+    let shift = await Shift.findOne({ _id: req.body.id});
 
     if (!shift) {
       res.status(404).send("Shift not found.")
     } else {
-        date = req.body.date || shift.date;
         startTime = req.body.startTime || shift.startTime;
         endTime = req.body.endTime || shift.endTime;
         assignedTo = req.body.assignedTo || shift.assignedTo;
@@ -489,10 +474,31 @@ app.post('/api/Users', async (req, res) => {
   }
 });
 
+app.patch('/api/Users/:id',  async (req, res) => {
+  try {
+    const {id} = req.params; 
+    const updatedData = req.body;
+    
+
+    let user = await User.findOne({ _id: id });
+
+    if (user) {
+      Object.assign(user, updatedData)
+      await user.save()
+      res.status(200).send(user)
+    } else {
+      return res.status(404).send("User was not found.")
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 app.delete('/api/Users/:id', async (req, res) => {
   try {
     console.log("Were in to delete.");
-    //console.log(req.body);
     let user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
       return res.status(404).send("User was not found.")
@@ -500,10 +506,7 @@ app.delete('/api/Users/:id', async (req, res) => {
     console.log(user)
     res.status(200).send();
 
-    // await User.deleteOne({});
-    // console.log("Uživatel smazán")
-    // console.log(user);
-    // res.send(user);
+
     } catch (error) { 
       console.error(error);
       res.status(500).send("Error deleting user")

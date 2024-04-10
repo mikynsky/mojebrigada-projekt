@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Form from 'react-bootstrap/Form';
 import ModalConfirmUser from './ModalConfirmUser';
+import axios from 'axios';
 
 
 function OffcanvasUser({name, surname, email, type, birthDate, id}) {
@@ -15,14 +16,41 @@ function OffcanvasUser({name, surname, email, type, birthDate, id}) {
     selected = 2;
   }
 
-
   const birthDateFormated = birthDate[8]+birthDate[9] + "." + birthDate[5]+birthDate[6] + "." + birthDate[0]+birthDate[1]+birthDate[2]+birthDate[3];
 
-
   const [show, setShow] = useState(false);
-
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const [patchName, setName] = useState(name);
+  const [patchSurname, setSurname] = useState(surname);
+  const [patchEmail, setEmail] = useState(email);
+
+  const [selectedType, setSelectedType] = useState(type);
+
+  const handleSelectType = (event) => {
+    setSelectedType(event.target.value);
+  }
+
+  const handlePatch = async (event) => {
+    const patchData = {
+      name: patchName,
+      surname: patchSurname,
+      email: patchEmail,
+      privilegeLevel: selectedType,
+    };
+
+    try {
+      const response = await axios.patch(`http://localhost:3001/api/Users/${id}`, patchData)
+      console.log('Data patching successfully:', response.data); 
+      window.location.reload();
+    } catch (error) {
+      console.error('Error patching data:', error);
+    }
+   
+  };
+
+
 
   const [modalShow, setModalShow] = React.useState(false);
 
@@ -43,30 +71,30 @@ function OffcanvasUser({name, surname, email, type, birthDate, id}) {
             <h4>Upravit údaje</h4>
             <Form.Group className="mb-3" controlId="formBasicUsername">
               <Form.Label>Jméno</Form.Label>
-              <Form.Control type="text" defaultValue={name}/>
+              <Form.Control type="text" defaultValue={patchName} onChange={(e) => setName(e.target.value)}/>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicUsername">
               <Form.Label>Příjmení</Form.Label>
-              <Form.Control type="text" defaultValue={surname}/>
+              <Form.Control type="text" defaultValue={patchSurname} onChange={(e) => setSurname(e.target.value)}/>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Email</Form.Label>
-              <Form.Control type="email" defaultValue={email} />
+              <Form.Control type="email" defaultValue={patchEmail} onChange={(e) => setEmail(e.target.value)}/>
             </Form.Group>
             
             <Form.Group className="mb-3" controlId="formBasicType">
               <Form.Label>Typ uživatele</Form.Label>
               
-              <Form.Select defaultValue={selected}>
-                <option value="1">Brigádník</option>
-                <option value="2">Administrátor</option>
+              <Form.Select defaultValue={selectedType} onChange={handleSelectType}>
+                <option value="User">Brigádník</option>
+                <option value="Admin">Administrátor</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicBirthDate">
             <Form.Label>Datum narození</Form.Label>
               <Form.Control type="text" placeholder={birthDateFormated} readOnly />
             </Form.Group>
-            <Button variant="secondary" type="submit">
+            <Button variant="secondary" type="submit" onClick={handlePatch}>
               Uložit změny
             </Button>
           </Form>

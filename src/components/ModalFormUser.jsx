@@ -38,7 +38,6 @@ function ModalFormUser(props) {
 
 
   const handleSubmit = async (event) => {
-    // event.preventDefault();
     const createdUser = {
       name: name,
       surname: surname,
@@ -55,6 +54,7 @@ function ModalFormUser(props) {
       console.error('Error posting data:', error);
     }
   };
+
 
   const handleClick = () => {
     handleSubmit();

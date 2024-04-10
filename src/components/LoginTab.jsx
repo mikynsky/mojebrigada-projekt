@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css"
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -7,9 +7,24 @@ import Alert from 'react-bootstrap/Alert';
 import axios from "axios";
 
 function LoginTab() {
+  const userRef = useRef();
+  const errRef = useRef();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errMsg, setErrMsg] = useState();
+  const [success, setSucces] = useState(false)
+
+  useEffect(() => {
+    userRef.current.focus();
+  }, [])
+
+  useEffect(() => {
+    setErrMsg('');
+  }, [email, password])
+
   const [alertStyle, setAlertStyle] = useState({visibility: "hidden"});
+
 
 
     const formStyle = {
@@ -24,11 +39,14 @@ function LoginTab() {
 
 
     const handleLogin = async (event) => {
-      event.preventDefault(); // Prevent the default form submit action
+      event.preventDefault(); 
 
       axios.post('http://localhost:3001/api/Login', {email,password})
         .then(response => {
             console.log(response.data);
+            setEmail('')
+            setPassword('')
+            setSucces(true)
             alert('Login successful!');
         })
         .catch(error => {
@@ -47,10 +65,11 @@ function LoginTab() {
         <Form.Group className="mb-3">
             <h1 style={titleStyle}>mojeBrigáda</h1>
             <Alert id="login-error-msg" style={alertStyle} key="danger" variant="danger">
-              Nesprávný email nebo heslo!
+              <p ref={errRef} aria-live="assertive" >{errMsg}</p>
+              
             </Alert>
           <Form.Label>Email</Form.Label>
-          <Form.Control id="email" type="email" placeholder="Zadejte email" value={email} onChange={(e) => setEmail(e.target.value)} required/>
+          <Form.Control id="email" ref={userRef} type="email" placeholder="Zadejte email" value={email} onChange={(e) => setEmail(e.target.value)} required/>
         </Form.Group>
 
         <Form.Group className="mb-3">

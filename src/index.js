@@ -11,6 +11,7 @@ import BrigadniciPage from './pages/adminSide/BrigadniciPage.jsx';
 import LoginPage from './pages/adminSide/LoginPage.jsx';
 import SmenyPageUser from './pages/userSide/SmenyPageUser.jsx';
 import DomuPageUser from './pages/userSide/DomuPageUser.jsx';
+import SettingsPageAdmin from './pages/adminSide/SettingsPageAdmin.jsx';
 
   const router = createBrowserRouter([
     {
@@ -40,7 +41,11 @@ import DomuPageUser from './pages/userSide/DomuPageUser.jsx';
   {
     path: "/domuUser",
     element: <DomuPageUser/>,
-},
+  },
+  {
+    path: "/settingsAdmin",
+    element: <SettingsPageAdmin/>,
+  },
       
   ]);
   

@@ -41,7 +41,7 @@ function OffcanvasShift({ day, month, year, ...props }) {
     const handleSelectEnd = (event) => {
       setSelectedEnd(event.target.value);
     }
-
+    
 
     const days = [];
       for (let day = 1; day <= 31; day++) {
@@ -81,7 +81,7 @@ function OffcanvasShift({ day, month, year, ...props }) {
         };
 
     return (
-      <>
+      <div>
       <div className='add-shift m-2' onClick={handleShow} title="Přidat směnu">+</div>
         <Offcanvas show={show} onHide={handleClose} {...props}>
           <Offcanvas.Header closeButton>
@@ -145,15 +145,17 @@ function OffcanvasShift({ day, month, year, ...props }) {
           </Form>
           </Offcanvas.Body>
         </Offcanvas>
-      </>   
+      </div>   
 )}
 
 function AddShift(date) {
-    date = new Date(date);
-    const day = date.getDate();
-    const month = date.getMonth();
-    const year =  date.getFullYear();
-    return (
+    const newDate = new Date(date);
+
+    const day = newDate.getDate();
+    const month = newDate.getMonth();
+    const year =  newDate.getFullYear();
+
+        return (
       <> 
           <OffcanvasShift day={day} month={month} year={year} placement="end" />
       </>
