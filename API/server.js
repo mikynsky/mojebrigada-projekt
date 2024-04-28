@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-
-
+const jwt = require('jsonwebtoken');
+require('dotenv').config({ path: '../../.env'  });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  phone: {
+    type: String,
+    required: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -58,6 +62,7 @@ const userSchema = new mongoose.Schema({
 const shiftSchema = new mongoose.Schema({
   startTime: String,
   endTime: String,
+  capacity: Number,
   assignedTo: {
     type: [{
       type: mongoose.Schema.Types.ObjectId,
@@ -134,67 +139,59 @@ const weekSchema = new mongoose.Schema({
   },
 })
 
+
 const templateSchema = new mongoose.Schema({
   templateName: String,
   monday: {
     shifts: [{
-        shiftOne: {
-          date: Date,
-          startTime: String,
-          endTime: String,
-        }
+      startTime: String,
+      endTime: String,
+      capacity: Number
     }]
   },
   tuesday: {
     shifts: [{
-        shiftOne: {
-          startTime: String,
-          endTime: String,
-        }
+      startTime: String,
+      endTime: String,
+      capacity: Number
     }]
   },
   wednesday: {
     shifts: [{
-        shiftOne: {
-          startTime: String,
-          endTime: String,
-        }
+      startTime: String,
+      endTime: String,
+      capacity: Number
     }]
   },
   thursday: {
     shifts: [{
-        shiftOne: {
-          startTime: String,
-          endTime: String,
-        }
+      startTime: String,
+      endTime: String,
+      capacity: Number
     }]
   },
   friday: {
     shifts: [{
-        shiftOne: {
-          startTime: String,
-          endTime: String,
-        }
+      startTime: String,
+      endTime: String,
+      capacity: Number
     }]
   },
   saturday: {
     shifts: [{
-        shiftOne: {
-          startTime: String,
-          endTime: String,
-        }
+      startTime: String,
+      endTime: String,
+      capacity: Number
     }]
   },
   sunday: {
     shifts: [{
-        shiftOne: {
-          startTime: String,
-          endTime: String,
-        }
-    }]
+      startTime: String,
+      endTime: String,
+      capacity: Number
+    }]    
   },
 })
-
 
 // přidání dvou hodin
 messageSchema.pre('save', function(next) {
@@ -202,30 +199,69 @@ messageSchema.pre('save', function(next) {
   next();
 });
 
+//Auth
 
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; 
 
+  if (token == null) return res.sendStatus(401); 
 
-//Login
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) return res.sendStatus(403); 
+      req.user = user;
+      next();
+  });
+};
+
+const authenticateAdminToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; 
+
+  if (token == null) return res.sendStatus(401); 
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) return res.sendStatus(403); 
+      if (user.privilegeLevel != "Admin") {
+        return res.status(401).send("Unauthorized");
+      }
+      req.user = user;
+      next();
+  });
+};
 
 app.post('/api/Login', async (req, res) => {
-  console.log(req)
-  const formEmail = req.body.email;
-  console.log(formEmail)
-  const formPass = req.body.password;
+  console.log("JWT Secret:", process.env.JWT_SECRET);
+  try {
+    console.log(req)
+    const formEmail = req.body.email;
+    console.log(formEmail)
+    const formPass = req.body.password;
 
-  const user = await User.findOne({ email: formEmail });
+    const user = await User.findOne({ email: formEmail });
 
 
-  console.log(user);
-  
-  if (user) {
-    const comparePass = await bcrypt.compare(formPass, user.password);
-    if (comparePass) {
-      return res.status(200).send("Login successful");
+    console.log(user);
+    
+    if (user) {
+      const comparePass = await bcrypt.compare(formPass, user.password);
+      if (comparePass) {
+        const token = jwt.sign(
+          { userId: user._id, name: user.name, surname: user.surname, privilegeLevel: user.privilegeLevel },
+          process.env.JWT_SECRET,
+          { expiresIn: '1h' })
+
+        return res.status(200).json({ message: "Login successful", token });
+      }
     }
+
+    return res.status(401).send("Invalid credentials");
+    
+  } catch (error) {
+    console.error("An error occurred:", error);
+    return res.status(500).send("Server Error: " + error.message);
   }
 
-  return res.status(401).send("Invalid credentials");
 });
 
 // TÝDNY
@@ -304,37 +340,78 @@ async function createNewWeek() {
 
 const Week = mongoose.model('Week', weekSchema);
 
-app.get('/api/Weeks', async (req, res) => {
+app.get('/api/Weeks', authenticateToken, async (req, res) => {
 
-  const weekNumber = req.query.weekNumber
-  const weeks = await Week.findOne({weekNumber: weekNumber});
+  try {
+    const weekNumber = req.query.weekNumber;
 
+    // First, check if the weekNumber is provided
+    if (!weekNumber) {
+      return res.status(400).send('Week number is required');
+    }
 
-  if (!weekNumber) {
-    res.status(400).send()
+    // Attempt to find the week by the provided number
+    const weeks = await Week.findOne({ weekNumber: weekNumber });
+
+    // If no week found, create a new week
+    if (!weeks) {
+      const newWeek = await createNewWeek();
+      console.log(newWeek);
+      return res.status(201).send(newWeek);
+    }
+
+    // If week found, log it and send the response
+    console.log(weeks);
+    res.send(weeks);
+  } catch (error) {
+    console.error('Error accessing /api/Weeks:', error);
+    res.status(500).send('Server error occurred');
   }
-
-  if (!weeks) {
-    createNewWeek();
-  }
-
-  console.log(weeks);
-  res.send(weeks);
 });
 
-
-app.get('/api/WeeksCurrent', async (req, res) => {
+app.patch('/api/Weeks/:id', async (req, res) => {
   try {
+    const {id} = req.params; 
+    const updatedData = req.body;
+    
 
+    let week = await Week.findOne({ _id: id });
+
+    if (week) {
+      Object.assign(week, updatedData)
+      await week.save()
+      res.status(200).send(week)
+    } else {
+      return res.status(404).send("Week was not found.")
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
+app.get('/api/WeeksCurrent', authenticateToken, async (req, res) => {
+  try {
     const currentDate = new Date();
-    currentDate.setHours(currentDate.getHours() + 2);
+    const startOfWeek = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate() - currentDate.getDay() + 1, // +1 adjusts for Monday as the first day of the week
+      0, 0, 0, 0 // Reset hours, minutes, seconds, and milliseconds to start of day
+    );
 
+    // Assuming you need to handle time zone difference specific to UTC
+    const utcStartOfWeek = new Date(Date.UTC(
+      startOfWeek.getFullYear(),
+      startOfWeek.getMonth(),
+      startOfWeek.getDate(),
+      23, 0, 0, 0 // Assuming the stored startDate has 23:00 UTC as the start time
+    ));
 
-    const date = new Date(currentDate);
-    date.setDate(date.getDate() - 6);
-
-
-    const week = await Week.findOne({ startDate: { $gt: date, $lte: currentDate } });
+    const week = await Week.findOne({
+      startDate: utcStartOfWeek
+    });
 
     if (week) {
       res.json(week.weekNumber);
@@ -342,13 +419,12 @@ app.get('/api/WeeksCurrent', async (req, res) => {
       res.json({ message: 'No week found for current date' });
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching current week:", error);
     res.status(500).send('Server Error');
   }
 });
 
-
-app.post('/api/Weeks', async (req, res) => {
+app.post('/api/Weeks', authenticateAdminToken,async (req, res) => {
   try {
     createNewWeek();
   } catch (error) {
@@ -361,7 +437,7 @@ app.post('/api/Weeks', async (req, res) => {
 
 const Template = mongoose.model('Template', templateSchema);
 
-app.get('/api/Templates', async (req, res) => {
+app.get('/api/Templates', authenticateToken, async (req, res) => {
   const template = await Template.find();
   console.log(template);
   res.send(template);
@@ -373,18 +449,19 @@ app.get('/api/Templates', async (req, res) => {
 const Shift = mongoose.model('Shift', shiftSchema);
 
 
-app.get('/api/Shifts', async (req, res) => {
+app.get('/api/Shifts', authenticateToken, async (req, res) => {
   const shifts = await Shift.find();
   console.log(shifts)
   res.send(shifts);
 });
 
-app.post('/api/Shifts', async (req, res) => {
+app.post('/api/Shifts', authenticateAdminToken, async (req, res) => {
  
   try {
     let shift = new Shift({
       startTime: req.body.startTime,
       endTime: req.body.endTime,
+      capacity: req.body.capacity,
       assignedTo: req.body.assignedTo
     })
     await shift.save();
@@ -396,7 +473,7 @@ app.post('/api/Shifts', async (req, res) => {
   }
 });
 
-app.patch('/api/Shifts', async (req, res) => {
+app.patch('/api/Shifts', authenticateAdminToken,async (req, res) => {
   try {
     let shift = await Shift.findOne({ _id: req.body.id});
 
@@ -426,14 +503,27 @@ app.patch('/api/Shifts', async (req, res) => {
 
 const User = mongoose.model('User', userSchema);
 
-app.get('/api/Users', async (req, res) => {
+app.get('/api/Users', authenticateToken, async (req, res) => {
   const users = await User.find();
   console.log(users);
   res.send(users);
 });
 
+app.get('/api/Users/:userId', authenticateToken, async (req, res) => {
+  const userId = req.params.userId; 
+  try {
+      const user = await User.findById(userId); // Find the user by ID
+      if (user) {
+          res.send(user);
+      } else {
+          res.status(404).send({ message: "User not found" });
+      }
+  } catch (error) {
+      console.error("Error finding user:", error);
+      res.status(500).send({ message: "Server error" });
+  }})
 
-app.post('/api/Users', async (req, res) => {
+app.post('/api/Users', authenticateAdminToken, async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
     console.log(user)
@@ -448,6 +538,7 @@ app.post('/api/Users', async (req, res) => {
         surname: req.body.surname,
         email: req.body.email,
         password: hashedPassword,
+        phone: req.body.phone,
         createdAt: req.body.createdAt || Date.now(),
         birthDate: dateFormated,
         privilegeLevel: req.body.privilegeLevel || "User"
@@ -474,7 +565,7 @@ app.post('/api/Users', async (req, res) => {
   }
 });
 
-app.patch('/api/Users/:id',  async (req, res) => {
+app.patch('/api/Users/:id', authenticateAdminToken, async (req, res) => {
   try {
     const {id} = req.params; 
     const updatedData = req.body;
@@ -496,7 +587,7 @@ app.patch('/api/Users/:id',  async (req, res) => {
   }
 });
 
-app.delete('/api/Users/:id', async (req, res) => {
+app.delete('/api/Users/:id', authenticateAdminToken, async (req, res) => {
   try {
     console.log("Were in to delete.");
     let user = await User.findByIdAndDelete(req.params.id);
@@ -518,7 +609,7 @@ app.delete('/api/Users/:id', async (req, res) => {
 
 const Message = mongoose.model('Message', messageSchema);
 
-app.get('/api/Messages', async (req, res) => {
+app.get('/api/Messages', authenticateToken, async (req, res) => {
   console.log("we have reached messages")
   try {
     const messages = await Message.find()
@@ -545,7 +636,7 @@ app.get('/api/Messages', async (req, res) => {
 
 
 
-app.post('/api/Messages', async (req, res) => {
+app.post('/api/Messages', authenticateToken, async (req, res) => {
     let message = new Message({
       createdAt: Date.now(),
       createdBy: req.body.createdBy,

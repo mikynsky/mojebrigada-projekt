@@ -6,6 +6,7 @@ import FloatingLabel from 'react-bootstrap/esm/FloatingLabel';
 import axios from 'axios';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import InputGroup from 'react-bootstrap/InputGroup';
 
 function ModalFormUser(props) {
   const {onHide} = props;
@@ -14,6 +15,7 @@ function ModalFormUser(props) {
   const [surname, setSurname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
 
   const [selectedDay, setSelectedDay] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
@@ -42,12 +44,15 @@ function ModalFormUser(props) {
       name: name,
       surname: surname,
       email: email,
+      phone: phone,
       password: password,
       birthDate: `${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay.padStart(2, '0')}`,
       privilegeLevel: selectedType,
     };
     try {
-      const response = await axios.post("http://localhost:3001/api/Users", createdUser)
+      const response = await axios.post("http://localhost:3001/api/Users", createdUser, {headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+    }})
       console.log('Data posted successfully:', response.data);
       window.location.reload(); 
     } catch (error) {
@@ -99,6 +104,14 @@ function ModalFormUser(props) {
           <Form.Control name="email" defaultValue={email} type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)}  />
         </FloatingLabel>
       </Form.Group>
+
+      <InputGroup className='mb-3'>
+        <InputGroup.Text>+420</InputGroup.Text>
+          <FloatingLabel controlId="floatingInputGrid" label="Telefoní číslo">
+          <Form.Control name="phone" defaultValue={phone} type="phone" placeholder="Telefoní číslo" onChange={(e) => setPhone(e.target.value)}  />
+        </FloatingLabel>
+      </InputGroup>
+
       <Form.Group className="mb-3" controlId="passwordInput">
       <FloatingLabel controlId="floatingInputGrid" label="Výchozí heslo">
           <Form.Control name="password" defaultValue={password} type="password" placeholder="Heslo" onChange={(e) => setPassword(e.target.value)} />

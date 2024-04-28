@@ -8,13 +8,14 @@ import ModalConfirmShift from './ModalConfirmShift';
 
 
 
-function OffcanvasShiftInfo({ name, ...props }) {
+function OffcanvasShiftInfo({assignedTo, startTime, endTime, capacity, date, ...props }) {
     const [show, setShow] = useState(false);
   
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     const [modalShow, setModalShow] = React.useState(false);
+
   
     return (
       <>
@@ -27,20 +28,18 @@ function OffcanvasShiftInfo({ name, ...props }) {
           <Form>
             <Form.Group className="mb-3" controlId="formBasicUsername">
               <Form.Label>Datum</Form.Label>
-
-
-              <Form.Control type="text" value={name} readOnly/>
+              <Form.Control type="text" value={date} readOnly/>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Čas: Od</Form.Label>
-              <Form.Control type="email" placeholder="" readOnly />
+              <Form.Control type="email" value={startTime} readOnly />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Čas: Do</Form.Label>
-              <Form.Control type="email" placeholder="" readOnly/>
+              <Form.Control type="email" value={endTime} readOnly/>
             </Form.Group>
-            <Form.Label>Lidé přihlášeni na směnu:</Form.Label>
+            <Form.Label>Kapacita směny: 0/{capacity}</Form.Label>
             <hr></hr>
             <Button variant="primary" >Vymazat směnu</Button>
           </Form>
@@ -55,10 +54,10 @@ function OffcanvasShiftInfo({ name, ...props }) {
       </>   
 )}
 
-function ShiftBlock() {
+function ShiftBlock({assignedTo, startTime, endTime, capacity, date}) {
     return (
       <>
-          <OffcanvasShiftInfo/>
+          <OffcanvasShiftInfo assignedTo={assignedTo} startTime={startTime} endTime={endTime} capacity={capacity} date={date}/>
       </>
     );
   }

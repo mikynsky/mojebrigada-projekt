@@ -4,6 +4,27 @@ import Image from "../img/home_img.jpg"
 import MessageCard from './MessageCard';
 import axios from "axios";
 
+function MessageList({ messages, users }) {
+  return (
+      <div>
+          {messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                   .map(message => {
+                      const user = users[message.createdBy];
+                      const authorName = user ? `${user.name} ${user.surname}` : "Unknown User";
+
+                      return <MessageCard 
+                          key={message._id}
+                          title={message.headline} 
+                          author={authorName}
+                          cardText={message.content}  
+                          createdAt={message.createdAt}
+                      />
+                   })}
+      </div>
+  );
+}
+
+
 function HomeCard() {
 
     let date = new Date()
@@ -24,17 +45,35 @@ function HomeCard() {
 
     
     useEffect(()=> {
-      axios.get("http://localhost:3001/api/Messages")
-      .then(messages => setMessages(messages.data))
-      .catch(err => console.log(err))
+      axios.get("http://localhost:3001/api/Messages", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+        .then(response => {
+            setMessages(response.data);
+            return response.data;
+        })
+        .then(messages => {
+            messages.forEach(message => {
+                if (message.createdBy && !users[message.createdBy]) {
+                    axios.get(`http://localhost:3001/api/Users/${message.createdBy}`, {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                    .then(userResponse => {
+                        setUsers(prevUsers => ({
+                            ...prevUsers,
+                            [message.createdBy]: userResponse.data
+                        }));
+                    })
+                    .catch(err => console.log(err));
+                }
+            });
+        })
+        .catch(err => console.log(err));
     }, []);
-
-    useEffect(()=> {
-      axios.get("http://localhost:3001/api/Users")
-      .then(users => setUsers(users.data))
-      .catch(err => console.log(err))
-    }, []);
-
 
   return ( 
     <div className='d-flex justify-content-center text-center'>
@@ -49,17 +88,8 @@ function HomeCard() {
           </Card.Text>
         </Card.Body>
         
-        {
-          messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .map(message => {
-            return <MessageCard 
-              title={message.headline} 
-              author={`${message.userName} ${message.userSurname}`} 
-              cardText={message.content}  
-              createdAt={message.createdAt}
-            />
-          })
-        }
+      <MessageList messages={messages} users={users}></MessageList>
+
       </Card>
 
     </div>

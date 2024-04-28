@@ -4,9 +4,11 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import Form from 'react-bootstrap/Form';
 import ModalConfirmUser from './ModalConfirmUser';
 import axios from 'axios';
+import InputGroup from 'react-bootstrap/InputGroup';
 
 
-function OffcanvasUser({name, surname, email, type, birthDate, id}) {
+
+function OffcanvasUser({name, surname, email, phone, type, birthDate, id}) {
 
 
   let selected;
@@ -25,6 +27,7 @@ function OffcanvasUser({name, surname, email, type, birthDate, id}) {
   const [patchName, setName] = useState(name);
   const [patchSurname, setSurname] = useState(surname);
   const [patchEmail, setEmail] = useState(email);
+  const [patchPhone, setPhone] = useState(phone);
 
   const [selectedType, setSelectedType] = useState(type);
 
@@ -37,11 +40,14 @@ function OffcanvasUser({name, surname, email, type, birthDate, id}) {
       name: patchName,
       surname: patchSurname,
       email: patchEmail,
+      phone: patchPhone,
       privilegeLevel: selectedType,
     };
 
     try {
-      const response = await axios.patch(`http://localhost:3001/api/Users/${id}`, patchData)
+      const response = await axios.patch(`http://localhost:3001/api/Users/${id}`, patchData, {headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+    }})
       console.log('Data patching successfully:', response.data); 
       window.location.reload();
     } catch (error) {
@@ -81,6 +87,13 @@ function OffcanvasUser({name, surname, email, type, birthDate, id}) {
               <Form.Label>Email</Form.Label>
               <Form.Control type="email" defaultValue={patchEmail} onChange={(e) => setEmail(e.target.value)}/>
             </Form.Group>
+
+            <Form.Label>Telefoní číslo</Form.Label>
+            <InputGroup>
+              <InputGroup.Text>+420</InputGroup.Text>
+              <Form.Control type="phone" defaultValue={patchPhone} onChange={(e) => setPhone(e.target.value)}/>
+            </InputGroup>
+
             
             <Form.Group className="mb-3" controlId="formBasicType">
               <Form.Label>Typ uživatele</Form.Label>

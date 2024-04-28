@@ -3,6 +3,9 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import React, {useState} from "react";
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
+import { set } from 'mongoose';
+
 
 function ModalFormMessage(props) {
   const {onHide} = props;
@@ -10,13 +13,28 @@ function ModalFormMessage(props) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
+
+  function getUser() {
+    const token = localStorage.getItem('token'); 
+    if (token) {
+        const decoded = jwtDecode(token);
+        console.log(decoded); 
+
+        return decoded.userId
+    }}
+
   const handleSubmit = async (event) => {
+    const userId = getUser()
     const createdMessage = {
       headline: title,
+      createdBy: userId,
       content: content,
     };
     try {
-      const response = await axios.post("http://localhost:3001/api/Messages", createdMessage)
+      const response = await axios.post("http://localhost:3001/api/Messages", createdMessage, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }})
       console.log('Data posted successfully:', response.data);
       window.location.reload(); 
     } catch (error) {

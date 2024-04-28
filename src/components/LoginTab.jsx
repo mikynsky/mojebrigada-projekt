@@ -1,27 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css"
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { Link } from "react-router-dom";
 import Alert from 'react-bootstrap/Alert';
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+import {jwtDecode} from 'jwt-decode';
+import { useAuth } from '../context/AuthContext';
 
 function LoginTab() {
-  const userRef = useRef();
-  const errRef = useRef();
-
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errMsg, setErrMsg] = useState();
-  const [success, setSucces] = useState(false)
-
-  useEffect(() => {
-    userRef.current.focus();
-  }, [])
-
-  useEffect(() => {
-    setErrMsg('');
-  }, [email, password])
+  const { login } = useAuth();
 
   const [alertStyle, setAlertStyle] = useState({visibility: "hidden"});
 
@@ -43,18 +34,35 @@ function LoginTab() {
 
       axios.post('http://localhost:3001/api/Login', {email,password})
         .then(response => {
-            console.log(response.data);
-            setEmail('')
-            setPassword('')
-            setSucces(true)
-            alert('Login successful!');
+            console.log(response);
+            const { token } = response.data;
+            localStorage.setItem('token', token);
+            login();
+            const decoded = jwtDecode(token);
+            console.log(decoded);
+
+            if (decoded.privilegeLevel === 'Admin') {
+              navigate('/domu');
+            } else if (decoded.privilegeLevel === 'User') {
+              navigate('/domuUser');
+            }
         })
         .catch(error => {
-            console.error('Error logging in:', error.response.data);
-            alert('Login failed: Invalid credentials');
+          if (!error.response) {
+            console.error("No Server Response");
+            alert("No server response");
+        } else if (error.response.status === 400) {
+            console.error("Missing Username or Password");
+            alert("Missing Username or Password");
+        } else if (error.response.status === 401) {
+            console.error("Invalid Credentials");
+        } else {
+            console.error("Login Error:", error);
+            alert("Login Error");
+        }
             setAlertStyle({visibility: "visible"})
         });
-    };
+    }
     
 
     return (
@@ -64,12 +72,13 @@ function LoginTab() {
         <Form id="login-form" style={formStyle} onSubmit={handleLogin} className='mx-10 my-10 align-items-center justify-content-center'>
         <Form.Group className="mb-3">
             <h1 style={titleStyle}>mojeBrigáda</h1>
+
             <Alert id="login-error-msg" style={alertStyle} key="danger" variant="danger">
-              <p ref={errRef} aria-live="assertive" >{errMsg}</p>
-              
+              Nesprávné heslo nebo email
             </Alert>
+            
           <Form.Label>Email</Form.Label>
-          <Form.Control id="email" ref={userRef} type="email" placeholder="Zadejte email" value={email} onChange={(e) => setEmail(e.target.value)} required/>
+          <Form.Control id="email"  type="name" placeholder="Zadejte email" value={email} onChange={(e) => setEmail(e.target.value)} required/>
         </Form.Group>
 
         <Form.Group className="mb-3">
@@ -77,11 +86,9 @@ function LoginTab() {
           <Form.Control id="password" type="password" placeholder="Heslo" value={password} onChange={(e) => setPassword(e.target.value)} required/>
         </Form.Group>
         <div className="d-flex align-items-center justify-content-center">
-        <Link to="/domu">
-          <Button id="login-form-submit" className="btn-lg" variant="danger" onClick={handleLogin} type="submit" >
+          <Button id="login-form-submit" className="btn-lg" variant="danger"  type="submit" >
             Přihlásit se
         </Button>
-        </Link>
         </div>
       </Form>
     </div>

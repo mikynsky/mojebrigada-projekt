@@ -15,23 +15,24 @@ function OffcanvasShift({ day, month, year, ...props }) {
     const handleShow = () => setShow(true);
 
 
-    const [selectedDay, setSelectedDay] = useState(day);
-    const [selectedMonth, setSelectedMonth] = useState(month);
-    const [selectedYear, setSelectedYear] = useState(year);
+    const [selectedDayIndex, setSelectedDayIndex] = useState(day -1);
+    const [selectedMonthIndex, setSelectedMonthIndex] = useState(month +1);
+    const [selectedYearIndex, setSelectedYearIndex] = useState(year);
     const [selectedStart, setSelectedStart] = useState('');
     const [selectedEnd, setSelectedEnd] = useState('');
+    const [selectedCapacity, setSelectedCapacity] = useState('');
 
     
     const handleSelectDay = (event) => {
-      setSelectedDay(event.target.value);
+      setSelectedDayIndex(event.target.value);
     }
 
     const handleSelectMonth = (event) => {
-      setSelectedMonth(event.target.value);
+      setSelectedMonthIndex(event.target.value);
     }
 
     const handleSelectYear = (event) => {
-      setSelectedYear(event.target.value);
+      setSelectedYearIndex(event.target.value);
     }
 
     const handleSelectStart = (event) => {
@@ -40,6 +41,10 @@ function OffcanvasShift({ day, month, year, ...props }) {
 
     const handleSelectEnd = (event) => {
       setSelectedEnd(event.target.value);
+    }
+
+    const handleSelectCapacity = (event) => {
+      setSelectedCapacity(event.target.value);
     }
     
 
@@ -65,7 +70,8 @@ function OffcanvasShift({ day, month, year, ...props }) {
           const createdShift = {
             date: year + "-" + month + "-" + day ,
             startTime: selectedStart,
-            endTime: selectedEnd
+            endTime: selectedEnd,
+            capacity: selectedCapacity
           };
           try {
             const response = await axios.post("http://localhost:3001/api/Shifts", createdShift)
@@ -93,13 +99,13 @@ function OffcanvasShift({ day, month, year, ...props }) {
               <Form.Label>Datum</Form.Label>
               <Row>
           <Col md>
-            <Form.Select defaultValue={selectedDay} onChange={handleSelectDay} aria-label="Day">
+            <Form.Select defaultValue={selectedDayIndex} onChange={handleSelectDay} aria-label="Day">
                 <option>DD</option>
                 {days}
             </Form.Select>
           </Col>
           <Col md>
-            <Form.Select defaultValue={selectedMonth} onChange={handleSelectMonth} aria-label="Month">
+            <Form.Select defaultValue={selectedMonthIndex} onChange={handleSelectMonth} aria-label="Month">
                 <option>MM</option>
                 <option key="01" value="1">Leden</option>
                 <option key="02" value="2">Únor</option>
@@ -116,7 +122,7 @@ function OffcanvasShift({ day, month, year, ...props }) {
             </Form.Select>
           </Col>
           <Col md>
-            <Form.Select defaultValue={selectedYear} onChange={handleSelectYear} aria-label="Year">
+            <Form.Select defaultValue={selectedYearIndex} onChange={handleSelectYear} aria-label="Year">
                 <option>Rok</option>
                 {years}
             </Form.Select>
@@ -138,6 +144,22 @@ function OffcanvasShift({ day, month, year, ...props }) {
                 {time}
               </Form.Select>       
             </Form.Group>
+
+            <Form.Group className="mb-3" controlId="formBasicEmail">
+              <Form.Label>Kapacita směny</Form.Label>
+              <Form.Select defaultValue={selectedCapacity} onChange={handleSelectCapacity} aria-label="Day">
+                <option key="1" value="1">1</option>
+                <option key="2" value="2">2</option>
+                <option key="3" value="3">3</option>
+                <option key="4" value="4">4</option>
+                <option key="5" value="5">5</option>
+                <option key="6" value="6">6</option>
+                <option key="7" value="7">7</option>
+                <option key="8" value="8">8</option>
+                <option key="9" value="9">9</option>
+                <option key="10" value="10">10</option>
+              </Form.Select>       
+            </Form.Group>
             
             <Button variant="secondary" type="submit" onClick={handleClick}>
               Zveřejnit směnu
@@ -149,13 +171,13 @@ function OffcanvasShift({ day, month, year, ...props }) {
 )}
 
 function AddShift(date) {
-    const newDate = new Date(date);
+    const newDate = new Date(date.date);
 
     const day = newDate.getDate();
     const month = newDate.getMonth();
     const year =  newDate.getFullYear();
 
-        return (
+    return (
       <> 
           <OffcanvasShift day={day} month={month} year={year} placement="end" />
       </>
