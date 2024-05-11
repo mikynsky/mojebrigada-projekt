@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const jwtSecret = process.env.JWT_SECRET
+const jwtSecret = "6aba03562e0765da79d7ddf9d497e5070b2d53768e3629ac04f62215e0a52908"
 
 app.use(cors());
 app.use(bodyParser.json());

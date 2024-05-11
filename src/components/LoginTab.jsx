@@ -49,11 +49,11 @@ function LoginTab() {
         })
         .catch(error => {
           if (!error.response) {
-            console.error("No Server Response");
-            alert("No server response");
+            console.error("Server neodpovídá.");
+            alert("Server neodpovídá. Zkontrolujte zda API server běží. Pokud ne, je třeba ho zapnout.");
         } else if (error.response.status === 400) {
-            console.error("Missing Username or Password");
-            alert("Missing Username or Password");
+            console.error("Chybí email nebo heslo");
+            alert("Chybí email nebo heslo");
         } else if (error.response.status === 401) {
             console.error("Invalid Credentials");
         } else {

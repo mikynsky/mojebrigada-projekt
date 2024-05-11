@@ -15,6 +15,7 @@ import ErrorBoundary from './components/ErrorBoundary.jsx';
 import ReactDOM from 'react-dom/client';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './hooks/ProtectedRoute.js';
+import SettingsPageUser from "./pages/userSide/SettingsPageUser.jsx";
 
 const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
   {
     path: "/settingsAdmin",
     element: <ProtectedRoute allowedRoles={['Admin']}><ErrorBoundary><SettingsPageAdmin/></ErrorBoundary></ProtectedRoute>,
+  },
+  {
+    path: "/settingsUser",
+    element: <ProtectedRoute allowedRoles={['User']}><ErrorBoundary><SettingsPageUser/></ErrorBoundary></ProtectedRoute>,
   },
 ]);
 

@@ -1,0 +1,22 @@
+NÁVOD NA SPUŠTĚNÍ
+Projekt spustíte pomocí git bash konzole. Nejjednoduší ve VS Code -> Nový Terminal -> Git Bash
+
+1. Přejdete do rootového adresáře
+
+    cd 'mojebrigada-projekt-main/mojebrigada-projekt-main'
+
+2. Nainstalujete všechny npm balíčky pomocí příkazu
+
+    npm install
+
+3. Reactovou aplikaci spustíte pomocí příkazu
+
+    npm start
+
+4. Poté na novém okně konzole přejdete do složky API 
+
+    cd 'mojebrigada-projekt-main/mojebrigada-projekt-main/API'
+
+5. Spustíte API a databázi pomocí příkazu
+
+    nodemon server.js
