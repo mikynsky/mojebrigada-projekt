@@ -11,6 +11,7 @@ import SmenyPageUser from './pages/userSide/SmenyPageUser.jsx';
 import DomuPageUser from './pages/userSide/DomuPageUser.jsx';
 import SettingsPageAdmin from './pages/adminSide/SettingsPageAdmin.jsx';
 import App from './components/App';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import ReactDOM from 'react-dom/client';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './hooks/ProtectedRoute.js';
@@ -26,27 +27,31 @@ const router = createBrowserRouter([
   },
   {
     path: "/domu",
-    element: <ProtectedRoute><DomuPage/></ProtectedRoute>,
-  },
-  {
-    path: "/smeny",
-    element: <ProtectedRoute><SmenyPage/></ProtectedRoute>,
-  },
-  {
-    path: "/brigadnici",
-    element: <ProtectedRoute><BrigadniciPage/></ProtectedRoute>,
-  },
-  {
-    path: "/smenyUser",
-    element: <ProtectedRoute><SmenyPageUser/></ProtectedRoute>,
+    element: <ProtectedRoute allowedRoles={['Admin']}><ErrorBoundary><DomuPage/></ErrorBoundary></ProtectedRoute>,
   },
   {
     path: "/domuUser",
-    element: <ProtectedRoute><DomuPageUser/></ProtectedRoute>,
+    element: <ProtectedRoute allowedRoles={['User']}><ErrorBoundary><DomuPageUser/></ErrorBoundary></ProtectedRoute>,
+  },
+  {
+    path: "/smeny",
+    element: <ProtectedRoute allowedRoles={['Admin']}><ErrorBoundary><SmenyPage/></ErrorBoundary></ProtectedRoute>,
+  },
+  {
+    path: "/brigadnici",
+    element: <ProtectedRoute allowedRoles={['Admin']}><ErrorBoundary><BrigadniciPage/></ErrorBoundary></ProtectedRoute>,
+  },
+  {
+    path: "/smenyUser",
+    element: <ProtectedRoute allowedRoles={['User']}><ErrorBoundary><SmenyPageUser/></ErrorBoundary></ProtectedRoute>,
+  },
+  {
+    path: "/domuUser",
+    element: <ProtectedRoute allowedRoles={['User']}><ErrorBoundary><DomuPageUser/></ErrorBoundary></ProtectedRoute>,
   },
   {
     path: "/settingsAdmin",
-    element: <ProtectedRoute><SettingsPageAdmin/></ProtectedRoute>,
+    element: <ProtectedRoute allowedRoles={['Admin']}><ErrorBoundary><SettingsPageAdmin/></ErrorBoundary></ProtectedRoute>,
   },
 ]);
 

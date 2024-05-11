@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css"
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -15,12 +15,19 @@ function OffcanvasShift({ day, month, year, ...props }) {
     const handleShow = () => setShow(true);
 
 
-    const [selectedDayIndex, setSelectedDayIndex] = useState(day -1);
+    const [selectedDayIndex, setSelectedDayIndex] = useState(day);
     const [selectedMonthIndex, setSelectedMonthIndex] = useState(month +1);
     const [selectedYearIndex, setSelectedYearIndex] = useState(year);
     const [selectedStart, setSelectedStart] = useState('');
     const [selectedEnd, setSelectedEnd] = useState('');
-    const [selectedCapacity, setSelectedCapacity] = useState('');
+    const [selectedCapacity, setSelectedCapacity] = useState(1);
+
+    // Update state when props change
+    useEffect(() => {
+      setSelectedDayIndex(day);
+      setSelectedMonthIndex(month + 1);
+      setSelectedYearIndex(year);
+  }, [day, month, year]); // Depend on day, month, year
 
     
     const handleSelectDay = (event) => {
@@ -49,42 +56,102 @@ function OffcanvasShift({ day, month, year, ...props }) {
     
 
     const days = [];
-      for (let day = 1; day <= 31; day++) {
+    for (let day = 1; day <= 31; day++) {
         days.push(<option key={day} value={day}>{day}</option>);
+    }
+
+    const time = [];
+    for (let hour = selectedStart; hour < 24; hour++) {
+      let formatedHour = hour.toString().padStart(2, '0');
+      let hours = formatedHour + ":00";
+      time.push(<option key={formatedHour} value={formatedHour}>{hours}</option>);
+    }
+
+    const years = [];
+      for (let year = 1970; year <= 2030; year++) {
+        years.push(<option key={year} value={year}>{year}</option>);
       }
 
-      const time = [];
-      for (let hour = selectedStart; hour < 24; hour++) {
-        let formatedHour = hour.toString().padStart(2, '0');
-        let hours = formatedHour + ":00";
-        time.push(<option key={formatedHour} value={formatedHour}>{hours}</option>);
-      }
+    // async function createShift(shiftData) {
+    //   try {
+    //     const response = await axios.post("http://localhost:3001/api/Shifts", shiftData, {
+    //       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    //     });
+    //     return response.data; 
+    //   }
+    //   catch {
+    //     console.log("This is silly.");
+    //     return null;
+    //   }
+    // }
 
-      const years = [];
-        for (let year = 1970; year <= 2030; year++) {
-          years.push(<option key={year} value={year}>{year}</option>);
+    // async function addShiftToWeek(startDate, shiftId, createdDate) {
+    //   let dayOfWeek = createdDate.getDay();
+    //   const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    //   const weekUpdate = {
+    //     $push: {
+    //       [`${daysOfWeek[dayOfWeek]}.shifts`]: shiftId
+    //     }}
+
+    //   const addToWeek = axios.patch(`http://localhost:3001/api/Weeks/byDate/${startDate}`, weekUpdate, {
+    //       headers: {
+    //         Authorization: `Bearer ${localStorage.getItem('token')}`
+    //       }
+    //     });
+    //   return addToWeek.data; 
+    // }
+
+    const handleSubmit = async (event) => {
+      let createdShiftDate = new Date(year, month, day);
+      const createdShift = {
+        startTime: selectedStart + ":00",
+        endTime: selectedEnd + ":00",
+        capacity: selectedCapacity
+      };
+      function getStartDate(date) {
+        let result = new Date(date);
+        // Get the day of the week (0 for Sunday, 1 for Monday, ..., 6 for Saturday)
+        let dayOfWeek = result.getDay();
+        // Calculate the difference from Monday (1)
+        // Note: If the day is Sunday (0), we set it to 7 to make the calculation correct
+        if (dayOfWeek === 0) {
+          dayOfWeek = 7; // Treat Sunday as day 7 to move it to the previous week's Monday
         }
-
-        const handleSubmit = async (event) => {
-          // event.preventDefault();
-          const createdShift = {
-            date: year + "-" + month + "-" + day ,
-            startTime: selectedStart,
-            endTime: selectedEnd,
-            capacity: selectedCapacity
-          };
-          try {
-            const response = await axios.post("http://localhost:3001/api/Shifts", createdShift)
-            console.log('Data posted successfully:', response.data);
-          } catch (error) {
-            console.error('Error posting data:', error);
-          }
-        };
+        // Subtract the difference to get to the previous Monday
+        result.setDate(result.getDate() - (dayOfWeek - 1));
+        return result;
+      }
       
-        const handleClick = () => {
-          handleSubmit();
-          window.location.reload(); 
+        const token = localStorage.getItem('token');
+        axios.post("http://localhost:3001/api/Shifts", createdShift, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then((result) => {
+          try {
+          let dayOfWeek = createdShiftDate.getDay() - 1;
+          const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+          const resultData = result.data._id;
+          const weekUpdate = {
+            $push: {
+              [`${daysOfWeek[dayOfWeek]}.shifts`]: resultData
+            }}
+          const startDate = getStartDate(createdShiftDate);
+          axios.patch(`http://localhost:3001/api/Weeks/byDate/${startDate.toISOString().split('T')[0]}`, weekUpdate, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+              }
+            })
+        } catch (error) {
+        console.error('Error posting data:', error);
         };
+        });
+      
+    };
+
+      
+    const handleClick = () => {
+      handleSubmit();
+      window.location.reload(); 
+    };
 
     return (
       <div>
@@ -140,7 +207,7 @@ function OffcanvasShift({ day, month, year, ...props }) {
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Čas: Do</Form.Label>
               <Form.Select defaultValue={selectedEnd} onChange={handleSelectEnd} aria-label="Day">
-                <option>Od</option>
+                <option>Do</option>
                 {time}
               </Form.Select>       
             </Form.Group>

@@ -1,20 +1,23 @@
+require('dotenv').config({ path: '../../.env'  });
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config({ path: '../../.env'  });
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+const jwtSecret = process.env.JWT_SECRET
 
 app.use(cors());
 app.use(bodyParser.json());
 
 
 
-mongoose.connect('mongodb+srv://admin:admin@mojebrigadadb.3up8vxj.mongodb.net/mojeBrigadaDB', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://admin:admin@mojebrigadadb.3up8vxj.mongodb.net/mojeBrigadaDB')
   .then(() => console.log('Připojeno k databázi MongoDB'))
   .catch(err => console.error('Připojení k databázi MongoDB se nezdařilo', err));
 
@@ -207,7 +210,7 @@ const authenticateToken = (req, res, next) => {
 
   if (token == null) return res.sendStatus(401); 
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, jwtSecret, (err, user) => {
       if (err) return res.sendStatus(403); 
       req.user = user;
       next();
@@ -220,7 +223,7 @@ const authenticateAdminToken = (req, res, next) => {
 
   if (token == null) return res.sendStatus(401); 
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, jwtSecret, (err, user) => {
       if (err) return res.sendStatus(403); 
       if (user.privilegeLevel != "Admin") {
         return res.status(401).send("Unauthorized");
@@ -231,7 +234,7 @@ const authenticateAdminToken = (req, res, next) => {
 };
 
 app.post('/api/Login', async (req, res) => {
-  console.log("JWT Secret:", process.env.JWT_SECRET);
+  console.log("JWT Secret:", jwtSecret);
   try {
     console.log(req)
     const formEmail = req.body.email;
@@ -270,9 +273,12 @@ async function createNewWeek() {
   try {
 
     let latestWeek = await Week.findOne().sort({ startDate: -1 });
+    if (!latestWeek) {
+      console.error('No latest week found.');
+      return null; // Ensure to handle this case in your endpoint.
+    }
+
     const date = new Date(latestWeek.startDate);
-
-
     const existingWeek = await Week.findOne({ weekNumber: latestWeek.weekNumber + 1 });
 
     if (existingWeek) {
@@ -298,43 +304,24 @@ async function createNewWeek() {
     sundayDate.setDate(sundayDate.getDate() + 6);
 
 
-    var week = new Week({
+    const week = new Week({
       weekNumber: latestWeek.weekNumber + 1,
       startDate: date,
-      monday: {
-        dayDate: date,
-        shifts: []
-      },
-      tuesday: {
-        dayDate: tuesdayDate,
-        shifts: []
-      },
-      wednesday: {
-        dayDate: wednesdayDate,
-        shifts: []
-      },
-      thursday: {
-        dayDate: thursdayDate,
-        shifts: []
-      },
-      friday: {
-        dayDate: fridayDate,
-        shifts: []
-      },
-      saturday: {
-        dayDate: saturdayDate,
-        shifts: []
-      },
-      sunday: {
-        dayDate: sundayDate,
-        shifts: []
-      } 
+      monday: { dayDate: date, shifts: []},
+      tuesday: { dayDate: tuesdayDate, shifts: [] },
+      wednesday: { dayDate: wednesdayDate, shifts: []},
+      thursday: { dayDate: thursdayDate, shifts: []},
+      friday: { dayDate: fridayDate, shifts: []},
+      saturday: { dayDate: saturdayDate,shifts: [] },
+      sunday: { dayDate: sundayDate,shifts: [] } 
     })
 
       await week.save();
       console.log(week);
+      return week;
     } catch (error) {
-      console.error(error);
+      console.error("Failed to create new week:", error);
+      return res.status(500).send("Failed to create new week");
     }
 }
 
@@ -351,21 +338,27 @@ app.get('/api/Weeks', authenticateToken, async (req, res) => {
     }
 
     // Attempt to find the week by the provided number
-    const weeks = await Week.findOne({ weekNumber: weekNumber });
+    // const weeks = await Week.findOne({ weekNumber: weekNumber });
+    const weeks = await Week.findOne({ weekNumber }).populate({
+      path: 'monday.shifts tuesday.shifts wednesday.shifts thursday.shifts friday.shifts saturday.shifts sunday.shifts',
+      populate: { path: 'assignedTo', select: 'name surname' }
+      });
 
     // If no week found, create a new week
     if (!weeks) {
       const newWeek = await createNewWeek();
-      console.log(newWeek);
-      return res.status(201).send(newWeek);
+      if (newWeek) {
+        res.status(201).json(newWeek);
+      } else {
+        res.status(404).send('Failed to create new week');
+      }
     }
-
     // If week found, log it and send the response
     console.log(weeks);
     res.send(weeks);
   } catch (error) {
     console.error('Error accessing /api/Weeks:', error);
-    res.status(500).send('Server error occurred');
+    res.status(500).send('Server error occurred while creating new week');
   }
 });
 
@@ -391,6 +384,28 @@ app.patch('/api/Weeks/:id', async (req, res) => {
   }
 });
 
+app.patch('/api/Weeks/byDate/:startDate', async (req, res) => {
+  try {
+    const startDate = req.params.startDate; 
+    const updatedData = req.body;
+    
+
+    let week = await Week.findOne({ startDate: startDate });
+
+    if (week) {
+      Object.assign(week, updatedData)
+      await week.save()
+      res.status(200).send(week)
+    } else {
+      return res.status(404).send("Week was not found.")
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
 app.get('/api/WeeksCurrent', authenticateToken, async (req, res) => {
   try {
     const currentDate = new Date();
@@ -398,19 +413,18 @@ app.get('/api/WeeksCurrent', authenticateToken, async (req, res) => {
       currentDate.getFullYear(),
       currentDate.getMonth(),
       currentDate.getDate() - currentDate.getDay() + 1, // +1 adjusts for Monday as the first day of the week
-      0, 0, 0, 0 // Reset hours, minutes, seconds, and milliseconds to start of day
     );
 
-    // Assuming you need to handle time zone difference specific to UTC
-    const utcStartOfWeek = new Date(Date.UTC(
-      startOfWeek.getFullYear(),
-      startOfWeek.getMonth(),
-      startOfWeek.getDate(),
-      23, 0, 0, 0 // Assuming the stored startDate has 23:00 UTC as the start time
-    ));
+
+    const startOfDay = new Date(Date.UTC(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate(), 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate(), 23, 59, 59));
+
 
     const week = await Week.findOne({
-      startDate: utcStartOfWeek
+      startDate: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
     });
 
     if (week) {
@@ -473,25 +487,24 @@ app.post('/api/Shifts', authenticateAdminToken, async (req, res) => {
   }
 });
 
-app.patch('/api/Shifts', authenticateAdminToken,async (req, res) => {
+app.patch('/api/Shifts/:id', async (req, res) => {
   try {
-    let shift = await Shift.findOne({ _id: req.body.id});
+    const {id} = req.params; 
+    const updatedData = req.body;
 
-    if (!shift) {
-      res.status(404).send("Shift not found.")
+    let shift = await Shift.findOne({ _id: id });
+
+    if (shift) {
+      Object.assign(shift, updatedData)
+      await shift.save()
+      res.status(200).send(shift)
     } else {
-        startTime = req.body.startTime || shift.startTime;
-        endTime = req.body.endTime || shift.endTime;
-        assignedTo = req.body.assignedTo || shift.assignedTo;
+      return res.status(404).send("Shift was not found.")
     }
-
-    await shift.save();
-    console.log(shift);
-    res.send(shift);
 
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

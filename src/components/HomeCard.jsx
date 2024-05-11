@@ -83,8 +83,7 @@ function HomeCard() {
           <Card.Title>mojeBrigáda</Card.Title>
           <Card.Title>{hodiny}:{minutes}</Card.Title>
           <Card.Text>
-            Some quick example text to build on the card title and make up the
-            bulk of the card's content.
+            Testovací aplikace maturitního projektu MojeBrigáda.
           </Card.Text>
         </Card.Body>
         

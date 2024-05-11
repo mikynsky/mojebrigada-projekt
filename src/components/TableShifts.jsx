@@ -9,7 +9,15 @@ function WeekTable(props) {
   const { id, previous, next, current } = props;
   const daysOfWeek = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
 
-  const [week, setWeek] = useState([]);
+  const [week, setWeek] = useState({
+    monday: { dayDate: 0, shifts: [] },
+    tuesday: { dayDate: 0, shifts: [] },
+    wednesday: { dayDate: 0, shifts: [] },
+    thursday: { dayDate: 0, shifts: [] },
+    friday: { dayDate: 0, shifts: [] },
+    saturday: { dayDate: 0, shifts: [] },
+    sunday: { dayDate: 0, shifts: [] }
+  });
   const [isLast, setIsLast] = useState()
 
 
@@ -22,13 +30,20 @@ function WeekTable(props) {
     .then(response => {
       if (response.data) {
         setWeek(response.data);
-    }
-  })
-    .catch(err => console.log(err));
+      } else {
+      console.error('No data returned from API');
+  }})
+    .catch(err => {
+      console.log("Error fetching week data:", err)
+      setWeek({ 
+        // Reset to initial structure or handle error state
+        monday: { dayDate: 2, shifts: [] },
+      })});
   }, [id]);
 
 
   function formatedDate(date) {
+    if (!date) return ''; // Add this check to prevent errors
     let month;
     let day;
 
@@ -57,7 +72,6 @@ function WeekTable(props) {
   }, [id, isLast])
 
   var button = document.getElementById("left")
-  console.log(button);
   
 
 
@@ -66,11 +80,9 @@ function WeekTable(props) {
 
   for (const day of days) {
     const date = week[day]?.dayDate; 
-    console.log(date)
-    console.log(typeof date)
-    console.log(currentDate)
 
-    if (date instanceof Date && date.toDateString() === currentDate.toDateString() ) {
+
+  if (date instanceof Date && date.toDateString() === currentDate.toDateString() ) {
       const currentDayElement = document.getElementById(day);
       currentDayElement.classList.add('current-day');
     }
@@ -81,6 +93,10 @@ function WeekTable(props) {
       <>
       </>
     )
+  }
+
+  if (!week || !week.monday || !week.monday.dayDate) {
+    return <Spinner animation="border" variant="primary" />;
   }
 
   return (
@@ -99,11 +115,16 @@ function WeekTable(props) {
     <p>{formatedDate(week.monday.dayDate)}</p>
   </td>
   <div className='shift-container'>
-  {
-        week.monday.shifts.map(week => {
-          return <ShiftBlock assignedTo={week.monday.shifts} startTime={week.monday.shifts} endTime={week.monday.shifts} capacity={week.monday.shifts} date={week.monday.dayDate}/>
-        })
-      }
+    {week.monday.shifts.map(shift => {
+      return <ShiftBlock
+        key={shift._id}
+        assignedTo={shift.assignedTo}
+        startTime={shift.startTime}
+        endTime={shift.endTime}
+        capacity={shift.capacity}
+        date={formatedDate(week.monday.dayDate)}
+      />
+    })}
     <AddShift date={week.monday.dayDate} />
   </div>
 </tr>
@@ -113,7 +134,16 @@ function WeekTable(props) {
     <p>{formatedDate(week.tuesday.dayDate)}</p>
   </td>
   <div className='shift-container'>
-    <ShiftBlock></ShiftBlock>
+  {week.tuesday.shifts.map(shift => {
+      return <ShiftBlock
+        key={shift._id}
+        assignedTo={shift.assignedTo}
+        startTime={shift.startTime}
+        endTime={shift.endTime}
+        capacity={shift.capacity}
+        date={formatedDate(week.tuesday.dayDate)}
+      />
+    })}
     <AddShift date={week.tuesday.dayDate} />
   </div>
 </tr>
@@ -123,7 +153,16 @@ function WeekTable(props) {
     <p>{formatedDate(week.wednesday.dayDate)}</p>
   </td>
   <div className='shift-container'>
-    <ShiftBlock></ShiftBlock>
+  {week.wednesday.shifts.map(shift => {
+      return <ShiftBlock
+        key={shift._id}
+        assignedTo={shift.assignedTo}
+        startTime={shift.startTime}
+        endTime={shift.endTime}
+        capacity={shift.capacity}
+        date={formatedDate(week.wednesday.dayDate)}
+      />
+    })}
     <AddShift date={week.wednesday.dayDate} />
   </div>
 </tr>
@@ -133,7 +172,16 @@ function WeekTable(props) {
     <p>{formatedDate(week.thursday.dayDate)}</p>
   </td>
   <div className='shift-container'>
-    <ShiftBlock></ShiftBlock>
+  {week.thursday.shifts.map(shift => {
+      return <ShiftBlock
+        key={shift._id}
+        assignedTo={shift.assignedTo}
+        startTime={shift.startTime}
+        endTime={shift.endTime}
+        capacity={shift.capacity}
+        date={formatedDate(week.thursday.dayDate)}
+      />
+    })}
     <AddShift date={week.thursday.dayDate} />
   </div>
 </tr>
@@ -143,7 +191,16 @@ function WeekTable(props) {
     <p>{formatedDate(week.friday.dayDate)}</p>
   </td>
   <div className='shift-container'>
-    <ShiftBlock></ShiftBlock>
+  {week.friday.shifts.map(shift => {
+      return <ShiftBlock
+        key={shift._id}
+        assignedTo={shift.assignedTo}
+        startTime={shift.startTime}
+        endTime={shift.endTime}
+        capacity={shift.capacity}
+        date={formatedDate(week.friday.dayDate)}
+      />
+    })}
     <AddShift date={week.friday.dayDate} />
   </div>
 </tr>
@@ -153,7 +210,16 @@ function WeekTable(props) {
     <p>{formatedDate(week.saturday.dayDate)}</p>
   </td>
   <div className='shift-container'>
-    <ShiftBlock></ShiftBlock>
+  {week.saturday.shifts.map(shift => {
+      return <ShiftBlock
+        key={shift._id}
+        assignedTo={shift.assignedTo}
+        startTime={shift.startTime}
+        endTime={shift.endTime}
+        capacity={shift.capacity}
+        date={formatedDate(week.saturday.dayDate)}
+      />
+    })}
     <AddShift date={week.saturday.dayDate} />
   </div>
 </tr>
@@ -163,7 +229,16 @@ function WeekTable(props) {
     <p>{formatedDate(week.sunday.dayDate)}</p>
   </td>
   <div className='shift-container'>
-    <ShiftBlock></ShiftBlock>
+  {week.sunday.shifts.map(shift => {
+      return <ShiftBlock
+        key={shift._id}
+        assignedTo={shift.assignedTo}
+        startTime={shift.startTime}
+        endTime={shift.endTime}
+        capacity={shift.capacity}
+        date={formatedDate(week.sunday.dayDate)}
+      />
+    })}
     <AddShift date={week.sunday.dayDate}/>
   </div>
 </tr>
@@ -177,8 +252,8 @@ function WeekTable(props) {
 
 function TableShifts() {
 
-  const [tablePage, setTablePage] = useState()
-  const [currentWeek, setCurrentWeek] = useState()
+  const [tablePage, setTablePage] = useState(1)
+  const [currentWeek, setCurrentWeek] = useState(1)
 
   const handlePrevious = () => {
     setTablePage(tablePage - 1) 
@@ -197,6 +272,7 @@ function TableShifts() {
       }
   })
   .then(response => {
+    console.log(response.data)
     setCurrentWeek(response.data);
     setTablePage(response.data); 
   })

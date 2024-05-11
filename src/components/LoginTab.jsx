@@ -37,8 +37,8 @@ function LoginTab() {
             console.log(response);
             const { token } = response.data;
             localStorage.setItem('token', token);
-            login();
             const decoded = jwtDecode(token);
+            login(decoded.privilegeLevel);
             console.log(decoded);
 
             if (decoded.privilegeLevel === 'Admin') {

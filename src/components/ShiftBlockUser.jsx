@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css"
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -8,7 +8,7 @@ import ModalConfirmShift from './ModalConfirmShift';
 
 
 
-function OffcanvasShiftInfo({assignedTo = [], startTime, endTime, capacity, date, ...props }) {
+function OffcanvasShiftInfo({assignedTo, startTime, endTime, capacity, date, ...props }) {
     const [show, setShow] = useState(false);
   
     const handleClose = () => setShow(false);
@@ -16,6 +16,7 @@ function OffcanvasShiftInfo({assignedTo = [], startTime, endTime, capacity, date
 
     const [modalShow, setModalShow] = React.useState(false);
 
+  
     return (
       <>
       <div className='shift-block m-2' onClick={handleShow}>
@@ -42,15 +43,11 @@ function OffcanvasShiftInfo({assignedTo = [], startTime, endTime, capacity, date
               <Form.Label>Čas: Do</Form.Label>
               <Form.Control type="email" value={endTime} readOnly/>
             </Form.Group>
-            <Form.Label>Kapacita směny: {assignedTo.length}/{capacity}</Form.Label>
+            <Form.Label>Kapacita směny: 0/{capacity}</Form.Label>
             <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Lidé zapsání na směnu: 
-              {assignedTo.map(user => {
-                return " " + user.name + " " + user.surname + ","
-              })}
-    </Form.Label></Form.Group>
+            <Form.Label>Lidé zapsání na směnu: {assignedTo}</Form.Label></Form.Group>
             <hr></hr>
-            <Button variant="primary" >Vymazat směnu</Button>
+            <Button variant="secondary" >Zapsat se na směnu</Button>
           </Form>
           </Offcanvas.Body>
         </Offcanvas>
