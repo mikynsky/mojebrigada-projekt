@@ -1,3 +1,4 @@
+// Naimportování všech balíčků
 require('dotenv').config({ path: '../../.env'  });
 const express = require('express');
 const mongoose = require('mongoose');
@@ -6,22 +7,25 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-
+// Inicializace aplikace Express
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001; // Nastavení portu serveru
 
-const jwtSecret = "6aba03562e0765da79d7ddf9d497e5070b2d53768e3629ac04f62215e0a52908"
+// Tajný klíč pro JWT
+const jwtSecret = process.env.JWT_SECRET;
 
+
+// Middleware pro povolení CORS a parsování JSON těla
 app.use(cors());
 app.use(bodyParser.json());
 
 
-
+// Připojení k MongoDB pomocí řetězce připojení
 mongoose.connect('mongodb+srv://admin:admin@mojebrigadadb.3up8vxj.mongodb.net/mojeBrigadaDB')
   .then(() => console.log('Připojeno k databázi MongoDB'))
   .catch(err => console.error('Připojení k databázi MongoDB se nezdařilo', err));
 
-
+//Schéma objektu uživatele 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -61,7 +65,7 @@ const userSchema = new mongoose.Schema({
   } 
 });
 
-
+//Schéma objektu směny 
 const shiftSchema = new mongoose.Schema({
   startTime: String,
   endTime: String,
@@ -75,6 +79,7 @@ const shiftSchema = new mongoose.Schema({
   }
 });
 
+//Schéma objektu zprávy 
 const messageSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
@@ -88,6 +93,7 @@ const messageSchema = new mongoose.Schema({
   content: String
 })
 
+//Schéma objektu týdne 
 const weekSchema = new mongoose.Schema({
   weekNumber: Number,
   startDate: Date,
@@ -142,7 +148,7 @@ const weekSchema = new mongoose.Schema({
   },
 })
 
-
+//Schéma objektu šablony 
 const templateSchema = new mongoose.Schema({
   templateName: String,
   monday: {
@@ -196,14 +202,13 @@ const templateSchema = new mongoose.Schema({
   },
 })
 
-// přidání dvou hodin
+// přidání dvou hodin do času zprávy (UTC čas)
 messageSchema.pre('save', function(next) {
   this.createdAt.setHours(this.createdAt.getHours() + 2);
   next();
 });
 
-//Auth
-
+//Funkce Autentikace tokenu
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; 
@@ -217,6 +222,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+//Funkce Autentikace tokenu správce
 const authenticateAdminToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; 
@@ -233,6 +239,7 @@ const authenticateAdminToken = (req, res, next) => {
   });
 };
 
+//Endpoint přihlášení
 app.post('/api/Login', async (req, res) => {
   console.log("JWT Secret:", jwtSecret);
   try {
@@ -241,16 +248,17 @@ app.post('/api/Login', async (req, res) => {
     console.log(formEmail)
     const formPass = req.body.password;
 
+    // podle zadaného emailu se najde daný uživatel
     const user = await User.findOne({ email: formEmail });
 
 
     console.log(user);
     
     if (user) {
-      const comparePass = await bcrypt.compare(formPass, user.password);
+      const comparePass = await bcrypt.compare(formPass, user.password); //pomocí bcrypt se porovnají zahashované hesla
       if (comparePass) {
         const token = jwt.sign(
-          { userId: user._id, name: user.name, surname: user.surname, privilegeLevel: user.privilegeLevel },
+          { userId: user._id, name: user.name, surname: user.surname, privilegeLevel: user.privilegeLevel }, // vytvoří se JWT Token s expirací 1h
           process.env.JWT_SECRET,
           { expiresIn: '1h' })
 
@@ -269,13 +277,13 @@ app.post('/api/Login', async (req, res) => {
 
 // TÝDNY
 
-async function createNewWeek() {
+async function createNewWeek() { // funkce vytvoření nového týdnu v řadě
   try {
 
     let latestWeek = await Week.findOne().sort({ startDate: -1 });
     if (!latestWeek) {
       console.error('No latest week found.');
-      return null; // Ensure to handle this case in your endpoint.
+      return null; 
     }
 
     const date = new Date(latestWeek.startDate);
@@ -327,24 +335,24 @@ async function createNewWeek() {
 
 const Week = mongoose.model('Week', weekSchema);
 
+//Endpoint získání týdnů
 app.get('/api/Weeks', authenticateToken, async (req, res) => {
 
   try {
     const weekNumber = req.query.weekNumber;
 
-    // First, check if the weekNumber is provided
+    // Zkontrolujeme zda číslo není null
     if (!weekNumber) {
       return res.status(400).send('Week number is required');
     }
 
-    // Attempt to find the week by the provided number
-    // const weeks = await Week.findOne({ weekNumber: weekNumber });
+    // hledáme týden podle čísla týdnu
     const weeks = await Week.findOne({ weekNumber }).populate({
       path: 'monday.shifts tuesday.shifts wednesday.shifts thursday.shifts friday.shifts saturday.shifts sunday.shifts',
       populate: { path: 'assignedTo', select: 'name surname' }
       });
 
-    // If no week found, create a new week
+    // pokud týden není nalezen, vytvoří se
     if (!weeks) {
       const newWeek = await createNewWeek();
       if (newWeek) {
@@ -353,7 +361,6 @@ app.get('/api/Weeks', authenticateToken, async (req, res) => {
         res.status(404).send('Failed to create new week');
       }
     }
-    // If week found, log it and send the response
     console.log(weeks);
     res.send(weeks);
   } catch (error) {
@@ -362,6 +369,7 @@ app.get('/api/Weeks', authenticateToken, async (req, res) => {
   }
 });
 
+//Endpoint patchnutí týdnů
 app.patch('/api/Weeks/:id', async (req, res) => {
   try {
     const {id} = req.params; 
@@ -384,6 +392,7 @@ app.patch('/api/Weeks/:id', async (req, res) => {
   }
 });
 
+//Endpoint patchnutí týdnů podle data
 app.patch('/api/Weeks/byDate/:startDate', async (req, res) => {
   try {
     const startDate = req.params.startDate; 
@@ -406,6 +415,7 @@ app.patch('/api/Weeks/byDate/:startDate', async (req, res) => {
   }
 });
 
+//Endpoint získání čísla aktuálního týdne
 app.get('/api/WeeksCurrent', authenticateToken, async (req, res) => {
   try {
     const currentDate = new Date();
@@ -438,6 +448,7 @@ app.get('/api/WeeksCurrent', authenticateToken, async (req, res) => {
   }
 });
 
+//Endpoint zveřejnění týdnů
 app.post('/api/Weeks', authenticateAdminToken,async (req, res) => {
   try {
     createNewWeek();
@@ -451,6 +462,7 @@ app.post('/api/Weeks', authenticateAdminToken,async (req, res) => {
 
 const Template = mongoose.model('Template', templateSchema);
 
+//Endpoint získání šablon
 app.get('/api/Templates', authenticateToken, async (req, res) => {
   const template = await Template.find();
   console.log(template);
@@ -462,13 +474,14 @@ app.get('/api/Templates', authenticateToken, async (req, res) => {
 
 const Shift = mongoose.model('Shift', shiftSchema);
 
-
+//Endpoint získání směn
 app.get('/api/Shifts', authenticateToken, async (req, res) => {
   const shifts = await Shift.find();
   console.log(shifts)
   res.send(shifts);
 });
 
+//Endpoint zveřejnění směn
 app.post('/api/Shifts', authenticateAdminToken, async (req, res) => {
  
   try {
@@ -487,6 +500,7 @@ app.post('/api/Shifts', authenticateAdminToken, async (req, res) => {
   }
 });
 
+//Endpoint patchnutí směn
 app.patch('/api/Shifts/:id', async (req, res) => {
   try {
     const {id} = req.params; 
@@ -516,12 +530,14 @@ app.patch('/api/Shifts/:id', async (req, res) => {
 
 const User = mongoose.model('User', userSchema);
 
+//Endpoint získání uživatelů
 app.get('/api/Users', authenticateToken, async (req, res) => {
   const users = await User.find();
   console.log(users);
   res.send(users);
 });
 
+//Endpoint získání uživatelů podle ID
 app.get('/api/Users/:userId', authenticateToken, async (req, res) => {
   const userId = req.params.userId; 
   try {
@@ -536,6 +552,7 @@ app.get('/api/Users/:userId', authenticateToken, async (req, res) => {
       res.status(500).send({ message: "Server error" });
   }})
 
+  //Endpoint zveřejnění uživatelů
 app.post('/api/Users', authenticateAdminToken, async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
@@ -578,6 +595,7 @@ app.post('/api/Users', authenticateAdminToken, async (req, res) => {
   }
 });
 
+//Endpoint patchnutí uživatelů
 app.patch('/api/Users/:id', authenticateAdminToken, async (req, res) => {
   try {
     const {id} = req.params; 
@@ -600,6 +618,7 @@ app.patch('/api/Users/:id', authenticateAdminToken, async (req, res) => {
   }
 });
 
+//Endpoint smazání uživatelů
 app.delete('/api/Users/:id', authenticateAdminToken, async (req, res) => {
   try {
     console.log("Were in to delete.");
@@ -622,6 +641,7 @@ app.delete('/api/Users/:id', authenticateAdminToken, async (req, res) => {
 
 const Message = mongoose.model('Message', messageSchema);
 
+//Endpoint získání zpráv
 app.get('/api/Messages', authenticateToken, async (req, res) => {
   console.log("we have reached messages")
   try {
@@ -648,7 +668,7 @@ app.get('/api/Messages', authenticateToken, async (req, res) => {
 });
 
 
-
+//Endpoint zveřejnění zpráv
 app.post('/api/Messages', authenticateToken, async (req, res) => {
     let message = new Message({
       createdAt: Date.now(),
@@ -662,7 +682,7 @@ app.post('/api/Messages', authenticateToken, async (req, res) => {
     res.send(message);
   });
 
-
+// Spuštění serveru na zadaném portu
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 
 

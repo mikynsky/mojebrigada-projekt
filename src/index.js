@@ -1,3 +1,4 @@
+// Importy stránek pro administrační a uživatelské rozhraní
 import {
   createBrowserRouter,
   RouterProvider,
@@ -17,6 +18,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './hooks/ProtectedRoute.js';
 import SettingsPageUser from "./pages/userSide/SettingsPageUser.jsx";
 
+
+// Vytvoření routeru s definicemi cest a přiřazenými komponentami
 const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +29,8 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage/>,
   },
+   // Ostatní cesty jsou chráněny komponentou ProtectedRoute, která zkontroluje, jestli má uživatel příslušnou roli a JWT token
+   // V případě problémů komponenta ErrorBoundary zachytí a zobrazí chyby
   {
     path: "/domu",
     element: <ProtectedRoute allowedRoles={['Admin']}><ErrorBoundary><DomuPage/></ErrorBoundary></ProtectedRoute>,
@@ -60,7 +65,9 @@ const router = createBrowserRouter([
   },
 ]);
 
+// Vytvoření kořenového elementu React aplikace
 const root = ReactDOM.createRoot(document.getElementById('root'));
+// Renderování aplikace s Context providerem a RouterProviderem
 root.render(
   <React.StrictMode>
     <AuthProvider>

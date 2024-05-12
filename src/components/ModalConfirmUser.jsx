@@ -5,9 +5,9 @@ import axios from 'axios';
 function ModalConfirmUser(props) {
   const {userName, email, id, onHide } = props;
 
-
+  // Funkce pro manipulaci s mazáním uživatele
   const handleDelete = async (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Zamezí obvyklému chování formuláře při submitu
     try {
       const response = await axios.delete(`http://localhost:3001/api/Users/${id}`)
       console.log('Data deleted successfully:');

@@ -6,9 +6,10 @@ import axios from 'axios';
 import Spinner from 'react-bootstrap/Spinner';
 
 function WeekTable(props) {
-  const { id, previous, next, current } = props;
+  const { id, previous, next, current } = props; // Přístup k předaným props
   const daysOfWeek = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
 
+  // Stav pro uložení dat týdne získaných z API
   const [week, setWeek] = useState({
     monday: { dayDate: 0, shifts: [] },
     tuesday: { dayDate: 0, shifts: [] },
@@ -20,7 +21,7 @@ function WeekTable(props) {
   });
   const [isLast, setIsLast] = useState()
 
-
+  // Načítání dat pro zadaný týden z API při změně ID týdne
   useEffect(() => {
     axios.get(`http://localhost:3001/api/Weeks?weekNumber=${id}`, {
       headers: {
@@ -36,14 +37,14 @@ function WeekTable(props) {
     .catch(err => {
       console.log("Error fetching week data:", err)
       setWeek({ 
-        // Reset to initial structure or handle error state
+        // Reset stavu nebo zacházení s chybovým stavem
         monday: { dayDate: 2, shifts: [] },
       })});
   }, [id]);
 
-
+  // Funkce pro formátování data
   function formatedDate(date) {
-    if (!date) return ''; // Add this check to prevent errors
+    if (!date) return ''; 
     let month;
     let day;
 
@@ -63,6 +64,7 @@ function WeekTable(props) {
     return day + "." + month
   }
 
+  // Další useEffect pro aktualizaci stavu `isLast`, závisí na ID týdne
   useEffect(() => {
     if (id === 1 && !isLast) {
       setIsLast(true);
@@ -74,7 +76,7 @@ function WeekTable(props) {
   var button = document.getElementById("left")
   
 
-
+  // Kontrola a zvýraznění aktuálního dne v týdnu
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const currentDate = new Date();
 
@@ -95,6 +97,7 @@ function WeekTable(props) {
     )
   }
 
+  // Render logika, včetně podmíněného renderování spinneru pokud data nejsou dostupná
   if (!week || !week.monday || !week.monday.dayDate) {
     return <Spinner animation="border" variant="primary" />;
   }
@@ -252,9 +255,10 @@ function WeekTable(props) {
 
 function TableShifts() {
 
-  const [tablePage, setTablePage] = useState(1)
-  const [currentWeek, setCurrentWeek] = useState(1)
+  const [tablePage, setTablePage] = useState(1) // Stav pro sledování aktuální stránky tabulky
+  const [currentWeek, setCurrentWeek] = useState(1) // Stav pro sledování aktuálního týdne
 
+  // Logika pro přechod mezi týdny
   const handlePrevious = () => {
     setTablePage(tablePage - 1) 
   };
@@ -264,7 +268,7 @@ function TableShifts() {
   };
 
 
-
+  // Efekt pro načtení aktuálního týdne z API
   useEffect(()=> {
     axios.get("http://localhost:3001/api/WeeksCurrent", {
       headers: {

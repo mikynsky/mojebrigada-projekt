@@ -20,3 +20,9 @@ Projekt spustíte pomocí git bash konzole. Nejjednoduší ve VS Code -> Nový T
 5. Spustíte API a databázi pomocí příkazu
 
     nodemon server.js
+
+6. Před začátkem používání aplikace vytvořte soubor enviromentální proměnné v rootovém adresáři a vložte do něj danná data.
+
+název souboru: .env
+
+do souboru vložte tento řádek: JWT_SECRET="6aba03562e0765da79d7ddf9d497e5070b2d53768e3629ac04f62215e0a52908"

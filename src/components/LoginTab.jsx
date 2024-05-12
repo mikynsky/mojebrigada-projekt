@@ -14,7 +14,7 @@ function LoginTab() {
   const [password, setPassword] = useState('');
   const { login } = useAuth();
 
-  const [alertStyle, setAlertStyle] = useState({visibility: "hidden"});
+  const [alertStyle, setAlertStyle] = useState({visibility: "hidden"}); // Stav pro viditelnost chybové zprávy
 
 
 
@@ -28,19 +28,20 @@ function LoginTab() {
         textAlign: "center",
     }
 
-
+// Odeslání požadavku na přihlášení
     const handleLogin = async (event) => {
       event.preventDefault(); 
 
       axios.post('http://localhost:3001/api/Login', {email,password})
         .then(response => {
             console.log(response);
-            const { token } = response.data;
-            localStorage.setItem('token', token);
-            const decoded = jwtDecode(token);
-            login(decoded.privilegeLevel);
+            const { token } = response.data; // Získání tokenu z odpovědi
+            localStorage.setItem('token', token); // Uložení tokenu do localStorage
+            const decoded = jwtDecode(token); // Dekódování JWT tokenu
+            login(decoded.privilegeLevel); // Aktualizace kontextu s úrovní práv
             console.log(decoded);
 
+            // Navigace podle úrovně práv uživatele
             if (decoded.privilegeLevel === 'Admin') {
               navigate('/domu');
             } else if (decoded.privilegeLevel === 'User') {

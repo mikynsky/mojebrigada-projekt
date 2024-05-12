@@ -9,14 +9,16 @@ import Col from 'react-bootstrap/Col';
 import InputGroup from 'react-bootstrap/InputGroup';
 
 function ModalFormUser(props) {
-  const {onHide} = props;
+  const {onHide} = props; // Funkce onHide pro zavření modálního okna
 
+  // Lokální stavy pro uchování hodnot formuláře
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
 
+  // Stavy pro uchování vybraného dne, měsíce, roku a typu uživatele
   const [selectedDay, setSelectedDay] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
@@ -38,7 +40,7 @@ function ModalFormUser(props) {
     setSelectedType(event.target.value);
   }
 
-
+  // Funkce pro odeslání formuláře na server pomocí axios
   const handleSubmit = async (event) => {
     const createdUser = {
       name: name,
@@ -54,7 +56,7 @@ function ModalFormUser(props) {
         Authorization: `Bearer ${localStorage.getItem('token')}`
     }})
       console.log('Data posted successfully:', response.data);
-      window.location.reload(); 
+      window.location.reload();  // Reload stránky po úspěšném odeslání
     } catch (error) {
       console.error('Error posting data:', error);
     }
@@ -63,19 +65,21 @@ function ModalFormUser(props) {
 
   const handleClick = () => {
     handleSubmit();
-    onHide();
+    onHide(); // Zavření modálního okna po odeslání dat
   };
 
+  // Generování seznamu let pro výběr
   const years = [];
   for (let year = 1970; year <= 2030; year++) {
     years.push(<option key={year} value={year}>{year}</option>);
   }
+  // Generování seznamu dnů pro výběr
   const days = [];
   for (let day = 1; day <= 31; day++) {
     days.push(<option key={day} value={day}>{day}</option>);
   }
   
-
+// Render komponenty, zahrnuje modální okno s formulářem pro vytvoření nového uživatele
   return (
     <Modal
     {...props}

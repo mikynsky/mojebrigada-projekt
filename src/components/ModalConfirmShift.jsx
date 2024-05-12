@@ -3,13 +3,13 @@ import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
 
 function ModalConfirmShift(props) {
-  const {userName, email, id, onHide } = props;
+  const {id, onHide } = props;
 
-
+// Funkce pro manipulaci s mazáním směny
   const handleDelete = async (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Zamezí obvyklému chování formuláře při submitu
     try {
-      const response = await axios.delete(`http://localhost:3001/api/Users/${id}`)
+      const response = await axios.delete(`http://localhost:3001/api/Shifts/${id}`)
       console.log('Data deleted successfully:');
     } catch (error) {
       console.error('Error deleting data:', error);
@@ -26,7 +26,7 @@ function ModalConfirmShift(props) {
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Opravdu si přejete vymazat uživatele {userName}?
+          Opravdu si přejete vymazat směnu?
         </Modal.Title>
       </Modal.Header>
       <Modal.Footer>

@@ -8,21 +8,23 @@ import { set } from 'mongoose';
 
 
 function ModalFormMessage(props) {
-  const {onHide} = props;
+  const {onHide} = props; //Prop pro skrytí modálního okna
 
+  // Lokální stavy pro ukládání nadpisu a obsahu zprávy
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-
+// Funkce pro získání ID uživatele z JWT tokenu
   function getUser() {
     const token = localStorage.getItem('token'); 
     if (token) {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(token); // Dekódování tokenu
         console.log(decoded); 
 
-        return decoded.userId
+        return decoded.userId // Vrátí ID uživatele z tokenu
     }}
 
+    // Asynchronní funkce pro odeslání zprávy
   const handleSubmit = async (event) => {
     const userId = getUser()
     const createdMessage = {
@@ -42,11 +44,13 @@ function ModalFormMessage(props) {
     }
   };
 
+  // Funkce pro kliknutí, která zavolá odeslání formuláře a zavření modálního okna
   const handleClick = () => {
     handleSubmit();
     onHide();
   };
 
+  // Komponenta modálního okna s formulářem pro nadpis a obsah zprávy
   return (
     <Modal
     {...props}

@@ -9,12 +9,12 @@ import Row from 'react-bootstrap/esm/Row';
 import axios from 'axios';
 
 function OffcanvasShift({ day, month, year, ...props }) {
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(false); // Stav pro řízení viditelnosti offcanvas
   
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const handleClose = () => setShow(false);  // Funkce pro zavření offcanvas
+    const handleShow = () => setShow(true); // Funkce pro otevření offcanvas
 
-
+  // Stavové proměnné pro uchování vybraných hodnot formuláře
     const [selectedDayIndex, setSelectedDayIndex] = useState(day);
     const [selectedMonthIndex, setSelectedMonthIndex] = useState(month +1);
     const [selectedYearIndex, setSelectedYearIndex] = useState(year);
@@ -22,12 +22,12 @@ function OffcanvasShift({ day, month, year, ...props }) {
     const [selectedEnd, setSelectedEnd] = useState('');
     const [selectedCapacity, setSelectedCapacity] = useState(1);
 
-    // Update state when props change
+       // Synchronizace stavů s props, když se změní
     useEffect(() => {
       setSelectedDayIndex(day);
       setSelectedMonthIndex(month + 1);
       setSelectedYearIndex(year);
-  }, [day, month, year]); // Depend on day, month, year
+  }, [day, month, year]); 
 
     
     const handleSelectDay = (event) => {
@@ -72,35 +72,7 @@ function OffcanvasShift({ day, month, year, ...props }) {
         years.push(<option key={year} value={year}>{year}</option>);
       }
 
-    // async function createShift(shiftData) {
-    //   try {
-    //     const response = await axios.post("http://localhost:3001/api/Shifts", shiftData, {
-    //       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    //     });
-    //     return response.data; 
-    //   }
-    //   catch {
-    //     console.log("This is silly.");
-    //     return null;
-    //   }
-    // }
-
-    // async function addShiftToWeek(startDate, shiftId, createdDate) {
-    //   let dayOfWeek = createdDate.getDay();
-    //   const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-    //   const weekUpdate = {
-    //     $push: {
-    //       [`${daysOfWeek[dayOfWeek]}.shifts`]: shiftId
-    //     }}
-
-    //   const addToWeek = axios.patch(`http://localhost:3001/api/Weeks/byDate/${startDate}`, weekUpdate, {
-    //       headers: {
-    //         Authorization: `Bearer ${localStorage.getItem('token')}`
-    //       }
-    //     });
-    //   return addToWeek.data; 
-    // }
-
+      // Funkce pro odeslání dat o směně na server
     const handleSubmit = async (event) => {
       let createdShiftDate = new Date(year, month, day);
       const createdShift = {
@@ -110,18 +82,14 @@ function OffcanvasShift({ day, month, year, ...props }) {
       };
       function getStartDate(date) {
         let result = new Date(date);
-        // Get the day of the week (0 for Sunday, 1 for Monday, ..., 6 for Saturday)
         let dayOfWeek = result.getDay();
-        // Calculate the difference from Monday (1)
-        // Note: If the day is Sunday (0), we set it to 7 to make the calculation correct
         if (dayOfWeek === 0) {
-          dayOfWeek = 7; // Treat Sunday as day 7 to move it to the previous week's Monday
+          dayOfWeek = 7; 
         }
-        // Subtract the difference to get to the previous Monday
         result.setDate(result.getDate() - (dayOfWeek - 1));
         return result;
       }
-      
+         // Odeslání POST požadavku na server
         const token = localStorage.getItem('token');
         axios.post("http://localhost:3001/api/Shifts", createdShift, {
           headers: { Authorization: `Bearer ${token}` }
@@ -134,6 +102,7 @@ function OffcanvasShift({ day, month, year, ...props }) {
             $push: {
               [`${daysOfWeek[dayOfWeek]}.shifts`]: resultData
             }}
+            // Aktualizace týdne pomocí PATCH požadavku
           const startDate = getStartDate(createdShiftDate);
           axios.patch(`http://localhost:3001/api/Weeks/byDate/${startDate.toISOString().split('T')[0]}`, weekUpdate, {
               headers: {
@@ -236,7 +205,7 @@ function OffcanvasShift({ day, month, year, ...props }) {
         </Offcanvas>
       </div>   
 )}
-
+// Funkce pro inicializaci offcanvas komponenty s předaným datem
 function AddShift(date) {
     const newDate = new Date(date.date);
 
